@@ -112,6 +112,5 @@ def main():
                     event_feature = video_feature[begin_pivot: end_timestamp, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i)
 
-
 if __name__ == '__main__':
     main()
