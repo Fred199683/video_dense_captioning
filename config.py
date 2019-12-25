@@ -11,7 +11,7 @@ class Config():
 config = Config()
 
 config.DATASET.VOCAB_SIZE = 10000
-config.DATSET.VOCAB_THRESHOLD = 1
+config.DATASET.VOCAB_THRESHOLD = 1
 config.DATASET.SEQUENCE_LENGTH = 30  # max sequence length to pad
 config.DATASET.VOCAB_PATH = 'dataset/word_to_idx.json'
 config.DATASET.TRAIN.IDS_PATH = 'dataset/captions/train_ids.json'

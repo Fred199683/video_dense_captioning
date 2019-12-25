@@ -82,7 +82,7 @@ def main():
         if phase == 'train':
             captions_data = process_captions_data(caption_path, max_length=cfg.SEQUENCE_LENGTH)
 
-            word_to_idx = build_vocab(captions_data, threshold=cfg.VOCAB_THRESHOLD, vocab_size=cfg.VOCAB_SIZE)
+            word_to_idx = build_vocab(captions_data, threshold=cfg.VOCAB_THRESHOLD, vocab_size=cfg.DATASET.VOCAB_SIZE)
             save_json(word_to_idx, cfg.DATASET.VOCAB_PATH)
 
             captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx)
