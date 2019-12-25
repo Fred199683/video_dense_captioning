@@ -113,8 +113,7 @@ def main():
 
                 video_feature_path = os.path.join(feature_path, video_id)
 
-                assert not os.path.isdir(video_feature_path), 'Feature of a video have already been generated. '
-                + 'Please remove all features before generating them again.'
+                assert not os.path.isdir(video_feature_path), 'Feature of a video have already been generated. Please remove all features before generating them again.'
                 os.makedirs(video_feature_path)
 
                 for i, (begin_timestamp, end_timestamp) in enumerate(event_timestamps):
