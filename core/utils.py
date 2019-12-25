@@ -3,7 +3,7 @@ import json
 import time
 import os
 import sys
-sys.path.append('../coco-caption')
+sys.path.append('../../coco-caption')
 from pycocoevalcap.eval import COCOEvalCap
 from pycocotools.coco import COCO
 
