@@ -2,15 +2,16 @@ from collections import Counter
 from core.utils import save_json, load_json
 from config import config as cfg
 
-import os
 from tqdm import tqdm
 import h5py
+import numpy as np
+
+import os
 
 
-def process_captions_data(ann_file=None, max_length=None):
+def process_captions_data(ann_file, max_length=None):
     captions_data = load_json(ann_file)
 
-    del_idx = []
     for video_id, annotation in captions_data.items():
         sentences, timestamps = [], []
         for sentence, timestamp in zip(annotation['sentences'], annotation['timestamps']):
@@ -110,7 +111,8 @@ def main():
                     end_pivot = end_timestamp / video_duration * feature_size
 
                     event_feature = video_feature[begin_pivot: end_timestamp, :]
-                    np.save(os.path.join(video_feature_path, '%d.npy' % i)
+                    np.save(os.path.join(video_feature_path, '%d.npy' % i))
+
 
 if __name__ == '__main__':
     main()
