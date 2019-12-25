@@ -117,10 +117,10 @@ def main():
                 os.makedirs(video_feature_path)
 
                 for i, (begin_timestamp, end_timestamp) in enumerate(event_timestamps):
-                    begin_pivot = begin_timestamp / video_duration * feature_size
-                    end_pivot = end_timestamp / video_duration * feature_size
+                    begin_pivot = round(begin_timestamp / video_duration * feature_size)
+                    end_pivot = round(end_timestamp / video_duration * feature_size)
 
-                    event_feature = video_feature[begin_pivot: end_timestamp, :]
+                    event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i))
 
 
