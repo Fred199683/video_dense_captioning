@@ -4,7 +4,7 @@ class Config():
 
     def __getattr__(self, name):
         if name not in self.__dict__.keys():
-            self.name = Config()
+            self.__dict__[name] = Config()
 
         return self.__dict__[name]
 
