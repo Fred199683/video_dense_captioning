@@ -121,7 +121,7 @@ def main():
                     end_pivot = round(end_timestamp / video_duration * feature_size)
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
-                    np.save(os.path.join(video_feature_path, '%d.npy' % i))
+                    np.save(event_feature, os.path.join(video_feature_path, '%d.npy' % i))
 
 
 if __name__ == '__main__':
