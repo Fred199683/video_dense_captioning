@@ -13,8 +13,11 @@ def process_captions_data(ann_file, max_length=None):
     captions_data = load_json(ann_file)
 
     removing_count = 0
+    all_count = 0
     for video_id, annotation in captions_data.items():
         sentences, timestamps = [], []
+        all_count += len(annotation['sentences'])
+
         for sentence, timestamp in zip(annotation['sentences'], annotation['timestamps']):
             sentence = sentence.replace('.', '').replace(',', '').replace("'", '').replace('"', '')
             sentence = sentence.replace('&', 'and').replace('(', '').replace(')', '').replace('-', ' ')
@@ -29,7 +32,7 @@ def process_captions_data(ann_file, max_length=None):
         captions_data[video_id]['sentences'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
 
-    print('Removed %d sentences.' % removing_count)
+    print('Removed %d sentences over %d sentences.' % (removing_count, all_count))
 
     return captions_data
 
@@ -102,7 +105,6 @@ def main():
         video_ids = load_json(ids_path)
         with h5py.File(cfg.DATASET.RAW_FEATURE_PATH) as f_features:
             for video_id in video_ids:
-                print(video_id)
                 video_feature = f_features[video_id]['c3d_features']
 
                 feature_size = video_feature.shape[0]
@@ -111,7 +113,7 @@ def main():
 
                 video_feature_path = os.path.join(feature_path, video_id)
 
-                assert os.path.isdir(video_feature_path), 'Feature of a video have already been generated. '
+                assert not os.path.isdir(video_feature_path), 'Feature of a video have already been generated. '
                 + 'Please remove all features before generating them again.'
                 os.makedirs(video_feature_path)
 
