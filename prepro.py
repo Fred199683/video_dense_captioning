@@ -12,12 +12,15 @@ import os
 def process_captions_data(ann_file, max_length=None):
     captions_data = load_json(ann_file)
 
+    max_len = 0
     for video_id, annotation in captions_data.items():
         sentences, timestamps = [], []
         for sentence, timestamp in zip(annotation['sentences'], annotation['timestamps']):
             sentence = sentence.replace('.', '').replace(',', '').replace("'", '').replace('"', '')
             sentence = sentence.replace('&', 'and').replace('(', '').replace(')', '').replace('-', ' ')
             sentence = ' '.join(sentence.split())  # replace multiple spaces
+            if len(sentence.split(' ')) > max_len:
+                max_len = len(sentence.split(' '))
 
             if max_length is not None and len(sentence.split(' ')) < max_length:
                 sentences.append(sentence.lower())
@@ -25,6 +28,8 @@ def process_captions_data(ann_file, max_length=None):
 
         captions_data[video_id]['sentences'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
+    
+    print('Max length of dataset: %d' % max_len)
 
     return captions_data
 
@@ -80,9 +85,9 @@ def main():
             continue
 
         if phase == 'train':
-            captions_data = process_captions_data(caption_path, max_length=cfg.SEQUENCE_LENGTH)
+            captions_data = process_captions_data(caption_path, max_length=cfg.DATASET.SEQUENCE_LENGTH)
 
-            word_to_idx = build_vocab(captions_data, threshold=cfg.VOCAB_THRESHOLD, vocab_size=cfg.DATASET.VOCAB_SIZE)
+            word_to_idx = build_vocab(captions_data, threshold=cfg.DATASET.VOCAB_THRESHOLD, vocab_size=cfg.DATASET.VOCAB_SIZE)
             save_json(word_to_idx, cfg.DATASET.VOCAB_PATH)
 
             captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx)
