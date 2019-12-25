@@ -12,24 +12,24 @@ import os
 def process_captions_data(ann_file, max_length=None):
     captions_data = load_json(ann_file)
 
-    max_len = 0
+    removing_count = 0
     for video_id, annotation in captions_data.items():
         sentences, timestamps = [], []
         for sentence, timestamp in zip(annotation['sentences'], annotation['timestamps']):
             sentence = sentence.replace('.', '').replace(',', '').replace("'", '').replace('"', '')
             sentence = sentence.replace('&', 'and').replace('(', '').replace(')', '').replace('-', ' ')
             sentence = ' '.join(sentence.split())  # replace multiple spaces
-            if len(sentence.split(' ')) > max_len:
-                max_len = len(sentence.split(' '))
 
             if max_length is not None and len(sentence.split(' ')) < max_length:
                 sentences.append(sentence.lower())
                 timestamps.append(timestamp)
+            else:
+                removing_count += 1
 
         captions_data[video_id]['sentences'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
 
-    print('Max length of dataset: %d' % max_len)
+    print('Removed %d sentences.' % removing_count)
 
     return captions_data
 
@@ -73,7 +73,7 @@ def build_caption_vector(captions_data, word_to_idx):
 
             captions_data[video_id]['sentences'][i] = cap_vec
 
-    print('Finished building train caption vectors')
+    print('Finished building train caption vectors.')
     return captions_data
 
 
@@ -102,6 +102,7 @@ def main():
         video_ids = load_json(ids_path)
         with h5py.File(cfg.DATASET.RAW_FEATURE_PATH) as f_features:
             for video_id in video_ids:
+                print(video_id)
                 video_feature = f_features[video_id]['c3d_features']
 
                 feature_size = video_feature.shape[0]
