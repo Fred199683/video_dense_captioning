@@ -7,6 +7,7 @@ import h5py
 import numpy as np
 
 import os
+from shutil import rmtree
 
 
 def process_captions_data(ann_file, max_length=None):
@@ -99,12 +100,13 @@ def main():
             captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx)
             save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
 
-        if not os.path.isdir(feature_path):
+        if os.path.isdir(feature_path):
+            rmtree(feature_path)
             os.makedirs(feature_path)
 
         video_ids = load_json(ids_path)
         with h5py.File(cfg.DATASET.RAW_FEATURE_PATH) as f_features:
-            for video_id in video_ids:
+            for video_id in tqdm(video_ids):
                 video_feature = f_features[video_id]['c3d_features']
 
                 feature_size = video_feature.shape[0]
@@ -113,7 +115,6 @@ def main():
 
                 video_feature_path = os.path.join(feature_path, video_id)
 
-                assert not os.path.isdir(video_feature_path), 'Feature of a video have already been generated. Please remove all features before generating them again.'
                 os.makedirs(video_feature_path)
 
                 for i, (begin_timestamp, end_timestamp) in enumerate(event_timestamps):
@@ -121,7 +122,7 @@ def main():
                     end_pivot = round(end_timestamp / video_duration * feature_size)
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
-                    np.save(event_feature, os.path.join(video_feature_path, '%d.npy' % i))
+                    np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
 
 
 if __name__ == '__main__':
