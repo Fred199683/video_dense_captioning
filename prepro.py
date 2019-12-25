@@ -28,7 +28,7 @@ def process_captions_data(ann_file, max_length=None):
 
         captions_data[video_id]['sentences'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
-    
+
     print('Max length of dataset: %d' % max_len)
 
     return captions_data
@@ -49,7 +49,7 @@ def build_vocab(captions_data, threshold=1, vocab_size=None):
         vocab = [word for word in counter if counter[word] >= threshold]
 
     print('Filtered %d words to %d words with word count threshold %d.' % (len(counter), len(vocab), threshold))
-    word_to_idx = {u'<NULL>': 0, u'<START>': 1, u'<END>': 2}
+    word_to_idx = {u'<NULL>': 0, u'<START>': 1, u'<END>': 2, u'<UNK>': 3}
     idx = len(word_to_idx)
     for word in vocab:
         word_to_idx[word] = idx
@@ -64,7 +64,10 @@ def build_caption_vector(captions_data, word_to_idx):
             cap_vec = [word_to_idx['<START>']]
 
             for word in sentence.split(' '):  # caption contains only lower-case words
-                cap_vec.append(word_to_idx[word])
+                if word in word_to_idx.keys():
+                    cap_vec.append(word_to_idx[word])
+                else:
+                    cap_vec.append(word_to_idx['<UNK>'])
 
             cap_vec.append(word_to_idx['<END>'])
 
