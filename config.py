@@ -23,7 +23,7 @@ config.DATASET.VAL.CAPTION_PATH = 'dataset/val_1.json'
 config.DATASET.VAL.FEATURE_PATH = 'dataset/feature/train'
 config.DATASET.TEST.IDS_PATH = 'dataset/test_ids.json'
 config.DATASET.TEST.FEATURE_PATH = 'dataset/feature/train'
-config.DATASET.RAW_FEATURE_PATH = 'dataset/activitynet_13.hdf5'
+config.DATASET.RAW_FEATURE_PATH = 'dataset/sub_activitynet_v1-3.c3d.hdf5'
 
 config.MODEL.ERNN.ENABLE_SELECTOR = True
 config.MODEL.ERNN.D_FEATURE = 500  # size of each region feature
