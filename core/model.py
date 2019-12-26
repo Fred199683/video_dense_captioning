@@ -102,14 +102,14 @@ class EventRNN(nn.Module):
 
 
 class CaptionRNN(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg, vocab_length):
         super(CaptionRNN, self).__init__()
 
         self.prev2out = cfg.MODEL.CRNN.ENABLE_PREV2OUT
         self.ctx2out = cfg.MODEL.CRNN.ENABLE_CTX2OUT
         self.enable_selector = cfg.MODEL.CRNN.ENABLE_SELECTOR
         self.dropout = cfg.MODEL.CRNN.DROPOUT
-        self.V = cfg.MODEL.CRNN.L_VOCAB
+        self.V = vocab_length
         self.D = cfg.MODEL.CRNN.D_FEATURE  # size of each region feature
         self.M = cfg.MODEL.CRNN.D_EMBED
         self.H = cfg.MODEL.CRNN.D_HIDDEN

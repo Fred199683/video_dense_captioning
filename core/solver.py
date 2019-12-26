@@ -66,7 +66,7 @@ class CaptioningSolver(object):
         """
 
         self.event_rnn = EventRNN(cfg)
-        self.caption_rnn = CaptionRNN(cfg)
+        self.caption_rnn = CaptionRNN(cfg, len(word_to_idx))
 
         self._start = word_to_idx['<START>']
         self._null = word_to_idx['<NULL>']
