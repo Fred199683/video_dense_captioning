@@ -44,7 +44,7 @@ class EventRNN(nn.Module):
         self.features_selector_layer = nn.Linear(self.H, 1)
 
         # functional layers
-        self.features_batch_norm = nn.BatchNorm1d(self.L)
+        self.features_norm_layer = nn.LayerNorm(self.D)
 
     def get_initial_lstm(self, feats_proj):
         feats_mean = torch.mean(feats_proj, 1)
@@ -60,7 +60,7 @@ class EventRNN(nn.Module):
         return features_proj
 
     def normalize(self, x):
-        return self.features_batch_norm(x)
+        return self.features_norm_layer(x)
 
     def _attention_layer(self, features, features_proj, mask, hidden_states, attention_layer):
         h_att = F.relu(features_proj + self.hidden_to_attention_layer(hidden_states[-1]).unsqueeze(1))    # (N, L, D)
@@ -130,7 +130,7 @@ class CaptionRNN(nn.Module):
         self.embedding_to_output_layer = nn.Linear(self.M, self.V)
 
         # functional layers
-        self.features_batch_norm = nn.BatchNorm1d(self.L)
+        self.features_norm_layer = nn.LayerNorm(self.D)
         self.dropout = nn.Dropout(p=self.dropout)
 
     def project_features(self, features):
@@ -141,7 +141,7 @@ class CaptionRNN(nn.Module):
         return features_proj
 
     def normalize(self, x):
-        return self.features_batch_norm(x)
+        return self.features_norm_layer(x)
 
     def word_embedding(self, inputs):
         embed_inputs = self.embedding_lookup(inputs)  # (N, T, M) or (N, M)
@@ -190,4 +190,3 @@ class CaptionRNN(nn.Module):
         logits = self._decode_lstm(emb_captions, output.squeeze(0), feats_context)
 
         return logits, feats_alpha, (next_hidden_states, next_cell_states)
-
