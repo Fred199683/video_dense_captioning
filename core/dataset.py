@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 import os
 from .utils import load_json
-from .. import config.config as cfg
+from ..config import config as cfg
 
 
 class CocoCaptionDataset(Dataset):
@@ -29,3 +29,6 @@ class CocoCaptionDataset(Dataset):
 
     def __len__(self, ):
         return len(self.dataset)
+
+if __name__ == '__main__':
+    print('hello')
