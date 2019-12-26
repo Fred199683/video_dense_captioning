@@ -15,8 +15,6 @@ from .beam_decoder import BeamSearchDecoder
 
 from .model import EventRNN, CaptionRNN
 
-import sys
-sys.path.append('..')
 from config import config as cfg
 
 
