@@ -10,9 +10,7 @@ import os
 from shutil import rmtree
 
 
-def process_captions_data(ann_file, max_length=None):
-    captions_data = load_json(ann_file)
-
+def process_captions_data(captions_data, max_length=None):
     removing_count = 0
     all_count = 0
     for video_id, annotation in captions_data.items():
@@ -90,8 +88,10 @@ def main():
         if not phase_enabled:
             continue
 
+        captions_data = load_json(caption_path)
+
         if phase == 'train':
-            captions_data = process_captions_data(caption_path, max_length=cfg.DATASET.SEQUENCE_LENGTH)
+            captions_data = process_captions_data(captions_data, max_length=cfg.DATASET.SEQUENCE_LENGTH)
 
             word_to_idx = build_vocab(captions_data, threshold=cfg.DATASET.VOCAB_THRESHOLD, vocab_size=cfg.DATASET.VOCAB_SIZE)
             save_json(word_to_idx, cfg.DATASET.VOCAB_PATH)
@@ -118,6 +118,7 @@ def main():
                 for i, (begin_timestamp, end_timestamp) in enumerate(event_timestamps):
                     begin_pivot = round(begin_timestamp / video_duration * feature_size)
                     end_pivot = round(end_timestamp / video_duration * feature_size)
+                    print(begin_pivot, end_pivot)
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
