@@ -1,6 +1,5 @@
 import argparse
 from core.solver import CaptioningSolver
-from core.model import CaptionGenerator
 from core.dataset import CocoCaptionDataset
 
 parser = argparse.ArgumentParser(description='Train model.')
