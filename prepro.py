@@ -118,7 +118,6 @@ def main():
                 for i, (begin_timestamp, end_timestamp) in enumerate(event_timestamps):
                     begin_pivot = round(begin_timestamp / video_duration * feature_size)
                     end_pivot = round(end_timestamp / video_duration * feature_size)
-                    print(begin_pivot, end_pivot)
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
