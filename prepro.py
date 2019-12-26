@@ -83,11 +83,10 @@ def build_caption_vector(captions_data, word_to_idx):
 
 def main():
     enabled_phases = [('train', cfg.TRAIN.ENABLED), ('val', cfg.VAL.ENABLED), ('test', cfg.TEST.ENABLED)]
-    idx_paths = [cfg.DATASET.TRAIN.IDS_PATH, cfg.DATASET.VAL.IDS_PATH, cfg.DATASET.TEST.IDS_PATH]
     caption_paths = [cfg.DATASET.TRAIN.CAPTION_PATH, cfg.DATASET.VAL.CAPTION_PATH, '']
     feature_paths = [cfg.DATASET.TRAIN.FEATURE_PATH, cfg.DATASET.VAL.FEATURE_PATH, cfg.DATASET.TEST.FEATURE_PATH]
 
-    for (phase, phase_enabled), ids_path, caption_path, feature_path in zip(enabled_phases, idx_paths, caption_paths, feature_paths):
+    for (phase, phase_enabled), caption_path, feature_path in zip(enabled_phases, caption_paths, feature_paths):
         if not phase_enabled:
             continue
 
@@ -104,9 +103,8 @@ def main():
             rmtree(feature_path)
             os.makedirs(feature_path)
 
-        video_ids = load_json(ids_path)
         with h5py.File(cfg.DATASET.RAW_FEATURE_PATH) as f_features:
-            for video_id in tqdm(video_ids):
+            for video_id in tqdm(captions_data.keys()):
                 video_feature = f_features[video_id]['c3d_features']
 
                 feature_size = video_feature.shape[0]
