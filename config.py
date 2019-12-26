@@ -9,7 +9,8 @@ class Config():
         return self.__dict__[name]
 config = Config()
 
-config.DATASET.VOCAB_SIZE = None config.DATASET.VOCAB_THRESHOLD = 1
+config.DATASET.VOCAB_SIZE = None
+config.DATASET.VOCAB_THRESHOLD = 1
 config.DATASET.SEQUENCE_LENGTH = 30                                             # max sequence length to pad and eliminate those sentences exceed it
 config.DATASET.VOCAB_PATH = 'dataset/word_to_idx.json'                          # vocabulary to be saved by prepro.py and used by train.py and infer.py
 config.DATASET.TRAIN.IDS_PATH = 'dataset/captions/train_ids.json'               # training ids json
