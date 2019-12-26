@@ -60,7 +60,7 @@ def build_vocab(captions_data, threshold=1, vocab_size=None):
     return word_to_idx
 
 
-def build_caption_vector(captions_data, word_to_idx):
+def build_caption_vector(captions_data, word_to_idx, vocab_size=30):
     for video_id, annotation in captions_data.items():
         for i, sentence in enumerate(annotation['sentences']):
             cap_vec = [word_to_idx['<START>']]
@@ -72,6 +72,9 @@ def build_caption_vector(captions_data, word_to_idx):
                     cap_vec.append(word_to_idx['<UNK>'])
 
             cap_vec.append(word_to_idx['<END>'])
+
+            while len(cap_vec) < vocab_size + 2:
+                cap_vec.append(word_to_idx['<NULL>'])
 
             captions_data[video_id]['sentences'][i] = cap_vec
 
