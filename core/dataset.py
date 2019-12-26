@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 import os
 from .utils import load_json
-from ..config import config as cfg
+from .. import config.config as cfg
 
 
 class CocoCaptionDataset(Dataset):
