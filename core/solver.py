@@ -15,7 +15,9 @@ from .beam_decoder import BeamSearchDecoder
 
 from .model import EventRNN, CaptionRNN
 
-from ..config import config as cfg
+import sys
+sys.path.append('..')
+from config import config as cfg
 
 
 def pack_collate_fn(batch):

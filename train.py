@@ -25,12 +25,7 @@ def main():
     word_to_idx = train_data.get_vocab_dict()
     # load val dataset to print out scores every epoch
 
-    solver = CaptioningSolver(word_to_idx, train_data, val_data, n_time_steps=args.time_steps,
-                                    batch_size=args.batch_size, beam_size=args.beam_size, optimizer=args.optimizer, 
-                                    learning_rate=args.learning_rate, metric=args.metric,
-                                    eval_every=args.eval_steps,
-                                    checkpoint=args.checkpoint, checkpoint_dir=args.checkpoint_dir, 
-                                    log_path=args.log_path, device=args.device)
+    solver = CaptioningSolver(word_to_idx, train_data, val_data)
 
     solver.train(num_epochs=args.num_epochs)
 
