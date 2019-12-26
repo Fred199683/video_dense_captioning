@@ -105,10 +105,11 @@ class CaptioningSolver(object):
             self.val_loader = DataLoader(val_dataset, batch_size=self.batch_size, num_workers=4)
 
             # set an optimizer by update rule
+            params = list(self.event_rnn.parameters()) + list(self.caption_rnn.parameters())
             if self.update_rule == 'adam':
-                self.optimizer = optim.Adam(params=[self.event_rnn.parameters(), self.caption_rnn.parameters()], lr=self.learning_rate)
+                self.optimizer = optim.Adam(params=params, lr=self.learning_rate)
             elif self.update_rule == 'rmsprop':
-                self.optimizer = optim.RMSprop(params=[self.event_rnn.parameters(), self.caption_rnn.parameters()], lr=self.learning_rate)
+                self.optimizer = optim.RMSprop(params=params, lr=self.learning_rate)
 
             self.word_criterion = nn.CrossEntropyLoss(ignore_index=self._null, reduction='sum')
             self.alpha_criterion = nn.MSELoss(reduction='sum')
