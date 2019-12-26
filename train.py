@@ -4,16 +4,15 @@ from config import config as cfg
 
 
 def main():
-    args = parser.parse_args()
     # load train dataset
-    train_data = CocoCaptionDataset(caption_file=, split='train')
-    val_data = CocoCaptionDataset(caption_file=, split='val')
+    train_data = CocoCaptionDataset(caption_file=cfg.TRAIN.ENC_CAPTION_PATH, split='train')
+    val_data = CocoCaptionDataset(caption_file=cfg.VAL.CAPTION_PATH, split='val')
     word_to_idx = train_data.get_vocab_dict()
     # load val dataset to print out scores every epoch
 
     solver = CaptioningSolver(word_to_idx, train_data, val_data)
 
-    solver.train(num_epochs=args.num_epochs)
+    solver.train()
 
 if __name__ == "__main__":
     main()
