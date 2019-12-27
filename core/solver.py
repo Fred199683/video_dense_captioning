@@ -230,10 +230,10 @@ class CaptioningSolver(object):
         caption_mask = caption_mask.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
 
-        caption_features = self.caption_rnn.normalization(caption_features)
+        caption_features = self.caption_rnn.normalize(caption_features)
         caption_features_proj = self.caption_rnn.project_features(caption_features)
 
-        event_features = self.event_rnn.normalization(event_features)
+        event_features = self.event_rnn.normalize(event_features)
         event_features_proj = self.event_rnn.project_features(event_features)
 
         e_hidden_states, e_cell_states = self.event_rnn.get_initial_lstm(event_features_proj)
