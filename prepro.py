@@ -115,6 +115,7 @@ def main():
 
                 video_duration = captions_data[video_id]['duration']
                 event_timestamps = captions_data[video_id]['timestamps']
+                event_sentences = captions_data[video_id]['sentences']
 
                 video_feature_path = os.path.join(feature_path, video_id)
 
@@ -124,7 +125,7 @@ def main():
                     begin_pivot = round(begin_timestamp / video_duration * feature_size / 4)
                     end_pivot = round(end_timestamp / video_duration * feature_size / 4)
                     if begin_pivot == end_pivot:
-                        print('warning', begin_timestamp, end_timestamp)
+                        print('warning', begin_timestamp, end_timestamp, event_sentences[i])
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
