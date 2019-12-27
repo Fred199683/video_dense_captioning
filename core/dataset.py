@@ -18,7 +18,7 @@ class CocoCaptionDataset(Dataset):
     def __getitem__(self, index):
         video_id = self.video_ids[index]
         item = self.dataset[video_id]
-        event_paths = glob(os.path.join(self.feature_path[self.split], video_id))
+        event_paths = glob(os.path.join(self.feature_path[self.split], video_id, '*.npy'))
         event_features = [np.load(event_path) for event_path in event_paths]
 
         if self.split == 'train':
