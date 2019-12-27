@@ -19,7 +19,7 @@ from config import config as cfg
 
 
 def pack_collate_fn(batch):
-    batch_features, batch_cap_vecs, captions = zip(*batch)
+    batch_features, batch_cap_vecs = zip(*batch)
     # batch_features : batch, num_events, event_length, feature_dim
     # cap_vecs : batch, num_events, caption_length
 
@@ -46,7 +46,7 @@ def pack_collate_fn(batch):
     batch_mask = torch.arange(max_event_num)[None, :] < event_nums[:, None]
     event_masks = torch.arange(max_event_len)[None, None, :] < event_lens[:, :, None]
 
-    return padded_batch_caption_features, padded_batch_event_features, batch_cap_vecs, batch_mask, event_masks, captions
+    return padded_batch_caption_features, padded_batch_event_features, batch_cap_vecs, batch_mask, event_masks
 
 
 class CaptioningSolver(object):
