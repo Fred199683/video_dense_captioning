@@ -22,7 +22,7 @@ class CocoCaptionDataset(Dataset):
         event_features = [np.load(event_path) for event_path in event_paths]
 
         if self.split == 'train':
-            cap_vec = item['sentences']
+            cap_vec = item['vectors']
             return event_features, cap_vec
         return event_features, video_id
 

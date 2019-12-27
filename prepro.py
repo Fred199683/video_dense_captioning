@@ -28,7 +28,7 @@ def process_captions_data(captions_data, max_length=None):
             else:
                 removing_count += 1
 
-        captions_data[video_id]['sentences'] = sentences
+        captions_data[video_id]['vectors'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
 
     print('Removed %d sentences over %d sentences.' % (removing_count, all_count))
@@ -39,7 +39,7 @@ def process_captions_data(captions_data, max_length=None):
 def build_vocab(captions_data, threshold=1, vocab_size=None):
     counter = Counter()
     for annotation in captions_data.values():
-        for sentence in annotation['sentences']:
+        for sentence in annotation['vectors']:
             words = sentence.split(' ')  # caption contrains only lower-case words
             for word in sentence.split(' '):
                 counter[word] += 1
@@ -62,7 +62,7 @@ def build_vocab(captions_data, threshold=1, vocab_size=None):
 
 def build_caption_vector(captions_data, word_to_idx, vocab_size=30):
     for video_id, annotation in captions_data.items():
-        for i, sentence in enumerate(annotation['sentences']):
+        for i, sentence in enumerate(annotation['vectors']):
             cap_vec = [word_to_idx['<START>']]
 
             for word in sentence.split(' '):  # caption contains only lower-case words
@@ -76,7 +76,7 @@ def build_caption_vector(captions_data, word_to_idx, vocab_size=30):
             while len(cap_vec) < vocab_size + 2:
                 cap_vec.append(word_to_idx['<NULL>'])
 
-            captions_data[video_id]['sentences'][i] = cap_vec
+            captions_data[video_id]['vectors'][i] = cap_vec
 
     print('Finished building train caption vectors.')
     return captions_data
