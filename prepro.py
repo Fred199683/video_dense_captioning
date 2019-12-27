@@ -109,6 +109,7 @@ def main():
         with h5py.File(cfg.DATASET.RAW_FEATURE_PATH) as f_features:
             for video_id in tqdm(captions_data.keys()):
                 video_feature = f_features[video_id]['c3d_features']
+                print(type(video_feature))
 
                 feature_size = video_feature.shape[0]
                 video_duration = captions_data[video_id]['duration']
