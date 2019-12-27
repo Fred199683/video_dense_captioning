@@ -112,7 +112,7 @@ def main():
                 feature_size = video_feature.shape[0]
                 video_feature = np.pad(video_feature, ((0, (4 - (feature_size % 4)) % 4), (0, 0)))
                 video_feature = np.mean(video_feature.reshape(video_feature.shape[0] // 4, -1, video_feature.shape[1]), axis=1)
-                print(video_feature)
+                print(video_feature.shape)
 
                 video_duration = captions_data[video_id]['duration']
                 event_timestamps = captions_data[video_id]['timestamps']
