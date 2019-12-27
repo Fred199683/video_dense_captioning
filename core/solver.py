@@ -35,7 +35,7 @@ def pack_collate_fn(batch):
             padded_batch_event_features[i][j] = np.mean(features, axis=0)
 
     # event_lens : batch, max_event_num
-    print([[len(features) for features in event_features] + [0] * (max_event_num - len(event_features)) for event_features in batch_features])
+    print([[len(features) for features in event_features] for event_features in batch_features])
     event_lens = torch.tensor([[len(features) for features in event_features] + [0] * (max_event_num - len(event_features)) for event_features in batch_features])
     max_event_len = torch.max(event_lens)
 
