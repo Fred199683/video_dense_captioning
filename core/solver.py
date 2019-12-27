@@ -38,6 +38,7 @@ def pack_collate_fn(batch):
     padded_batch_event_features = np.zeros((batch_size, max_event_num, feature_dim))
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
+            print(features)
             padded_batch_event_features[i][j] = np.mean(features, axis=0)
 
     # event_lens : batch, max_event_num
