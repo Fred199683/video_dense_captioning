@@ -5,19 +5,15 @@ import numpy as np
 import os
 from .utils import load_json
 
-import sys
-sys.path.append('..')
-from config import config as cfg
-
 
 class CocoCaptionDataset(Dataset):
-    def __init__(self, caption_file, split='train'):
+    def __init__(self, caption_file, config, split='train'):
         self.split = split
         self.dataset = load_json(caption_file)
         self.video_ids = self.dataset.keys()
-        self.feature_path = {'train': cfg.DATASET.TRAIN.FEATURE_PATH,
-                             'val': cfg.DATASET.VAL.FEATURE_PATH,
-                             'test': cfg.DATASET.TEST.FEATURE_PATH}
+        self.feature_path = {'train': config.DATASET.TRAIN.FEATURE_PATH,
+                             'val': config.DATASET.VAL.FEATURE_PATH,
+                             'test': config.DATASET.TEST.FEATURE_PATH}
 
     def __getitem__(self, index):
         video_id = self.video_ids[index]

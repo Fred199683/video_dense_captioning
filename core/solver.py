@@ -9,7 +9,7 @@ from tensorboardX import SummaryWriter
 import numpy as np
 import os
 
-from .utils import *
+from .utils import save_json, evaluate, decode_captions
 from .dataset import CocoCaptionDataset
 from .beam_decoder import BeamSearchDecoder
 
@@ -73,7 +73,6 @@ class CaptioningSolver(object):
         self._end = word_to_idx['<END>']
         self.idx_to_word = {i: w for w, i in word_to_idx.items()}
 
-        self.n_time_steps = cfg.SOLVER.INFER.N_TIME_STEPS
         self.batch_size = cfg.SOLVER.TRAIN.BATCH_SIZE
         self.update_rule = cfg.SOLVER.TRAIN.OPTIM
         self.learning_rate = cfg.SOLVER.TRAIN.LR
@@ -83,16 +82,14 @@ class CaptioningSolver(object):
         self.log_path = cfg.SOLVER.TRAIN.LOG_DIR
         self.checkpoint_dir = cfg.SOLVER.TRAIN.CKPT_DIR
         self.checkpoint = cfg.SOLVER.TRAIN.CKPT
-        self.capture_scores = kwargs.pop('capture_scores', ['bleu_1', 'bleu_4', 'meteor', 'cider'])
         self.results_path = cfg.SOLVER.INFER.RESULT_PATH
-        self.beam_size = cfg.SOLVER.INFER.BEAM_SIZE
-        self.length_norm = cfg.SOLVER.INFER.LEN_NORM
+        self.capture_scores = kwargs.pop('capture_scores', ['bleu_1', 'bleu_4', 'meteor', 'cider'])
 
         self.device = cfg.SOLVER.DEVICE
 
         self.is_test = cfg.TEST.ENABLED and not (cfg.TRAIN.ENABLED or cfg.VAL.ENABLED)
 
-        # self.beam_decoder = BeamSearchDecoder(self.model, self.device, self.beam_size, len(self.idx_to_word), self._start, self._end, self.n_time_steps, self.length_norm)
+        self.beam_decoder = BeamSearchDecoder(self.model, len(self.idx_to_word), self._start, self._end, cfg)
 
         if self.checkpoint is not None:
             self._load(self.checkpoint, is_test=self.is_test)
@@ -245,7 +242,7 @@ class CaptioningSolver(object):
                 curr_cap_vecs = cap_vecs[:, event_idx, caption_idx]
 
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:, event_idx], caption_features_proj[:, event_idx], caption_mask,
-                                                                                        curr_cap_vecs, c_hidden_states, c_cell_states)
+                                                                                         curr_cap_vecs, c_hidden_states, c_cell_states)
                 loss += self.word_criterion(logits, cap_vecs)
                 # acc += torch.sum(torch.argmax(logits, dim=-1)[:caption_batch_sizes[caption_idx+1]] == cap_vecs[end_idx:end_idx+caption_batch_sizes[caption_idx+1]])
                 feats_alphas.append(feats_alpha)
@@ -279,11 +276,11 @@ class CaptioningSolver(object):
 
     def _test(self, engine, batch):
         self.model.eval()
-        features, tags, image_ids = batch
-        cap_vecs = self.beam_decoder.decode(features, tags)
+        features, video_ids = batch
+        cap_vecs = self.beam_decoder.decode(features)
         captions = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
-        image_ids = image_ids.numpy()
-        engine.state.captions = engine.state.captions + [{'image_id': int(image_id), 'caption': caption} for image_id, caption in zip(image_ids, captions)]
+        video_ids = video_ids.numpy()
+        engine.state.captions = engine.state.captions + [{'video_id': int(video_id), 'caption': caption} for video_id, caption in zip(video_ids, captions)]
 
     def train(self):
         self.train_engine.run(self.train_loader, max_epochs=self.n_epochs)
