@@ -107,6 +107,7 @@ def main():
             os.makedirs(feature_path)
 
         with h5py.File(cfg.DATASET.RAW_FEATURE_PATH) as f_features:
+            max_len = 0
             for video_id in tqdm(captions_data.keys()):
                 video_feature = f_features[video_id]['c3d_features'].value
                 feature_size = video_feature.shape[0]
@@ -126,6 +127,8 @@ def main():
                     end_pivot = round(end_timestamp / video_duration * feature_size / 4)
                     if begin_pivot == end_pivot:
                         print('warning', begin_timestamp, end_timestamp, event_sentences[i])
+                        if max_len < end_timestamp - begin_timestamp:
+                            max_len = end_timestamp - begin_timestamp
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
