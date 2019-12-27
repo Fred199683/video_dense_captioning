@@ -89,7 +89,7 @@ class CaptioningSolver(object):
 
         self.is_test = cfg.TEST.ENABLED and not (cfg.TRAIN.ENABLED or cfg.VAL.ENABLED)
 
-        self.beam_decoder = BeamSearchDecoder(self.model, len(self.idx_to_word), self._start, self._end, cfg)
+        self.beam_decoder = BeamSearchDecoder(self.caption_rnn, len(self.idx_to_word), self._start, self._end, cfg)
 
         if self.checkpoint is not None:
             self._load(self.checkpoint, is_test=self.is_test)
