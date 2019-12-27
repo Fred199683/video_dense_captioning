@@ -75,9 +75,6 @@ class CaptioningSolver(object):
             - test_checkpoint: String; model path for test
         """
 
-        self.event_rnn = EventRNN(cfg)
-        self.caption_rnn = CaptionRNN(cfg, len(word_to_idx))
-
         self._start = word_to_idx['<START>']
         self._null = word_to_idx['<NULL>']
         self._end = word_to_idx['<END>']
@@ -98,6 +95,9 @@ class CaptioningSolver(object):
         self.device = cfg.SOLVER.DEVICE
 
         self.is_test = cfg.TEST.ENABLED and not (cfg.TRAIN.ENABLED or cfg.VAL.ENABLED)
+
+        self.event_rnn = EventRNN(cfg).to(self.device)
+        self.caption_rnn = CaptionRNN(cfg, len(word_to_idx)).to(self.device)
 
         self.beam_decoder = BeamSearchDecoder(self.caption_rnn, len(self.idx_to_word), self._start, self._end, cfg)
 
