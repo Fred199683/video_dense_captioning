@@ -10,7 +10,7 @@ class CocoCaptionDataset(Dataset):
     def __init__(self, caption_file, config, split='train'):
         self.split = split
         self.dataset = load_json(caption_file)
-        self.video_ids = self.dataset.keys()
+        self.video_ids = list(self.dataset.keys())
         self.feature_path = {'train': config.DATASET.TRAIN.FEATURE_PATH,
                              'val': config.DATASET.VAL.FEATURE_PATH,
                              'test': config.DATASET.TEST.FEATURE_PATH}
