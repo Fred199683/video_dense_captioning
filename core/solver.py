@@ -47,6 +47,9 @@ def pack_collate_fn(batch):
     batch_mask = torch.arange(max_event_num)[None, :] < event_nums[:, None]
     event_masks = torch.arange(max_event_len)[None, None, :] < event_lens[:, :, None]
 
+    padded_batch_caption_features = torch.from_numpy(padded_batch_caption_features)
+    padded_batch_event_features = torch.from_numpy(padded_batch_event_features)
+
     return padded_batch_caption_features, padded_batch_event_features, batch_cap_vecs, batch_mask, event_masks
 
 
