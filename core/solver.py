@@ -25,6 +25,8 @@ def pack_collate_fn(batch):
 
     batch_size, feature_dim = len(batch_features), len(batch_features[0][0][0])
 
+    batch_cap_vecs = torch.tensor(batch_cap_vecs)
+
     # event_nums : batch
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
@@ -49,6 +51,7 @@ def pack_collate_fn(batch):
 
     padded_batch_caption_features = torch.from_numpy(padded_batch_caption_features)
     padded_batch_event_features = torch.from_numpy(padded_batch_event_features)
+
 
     return padded_batch_caption_features, padded_batch_event_features, batch_cap_vecs, batch_mask, event_masks
 
