@@ -129,7 +129,7 @@ def main():
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
-                    
+            print(max_len)
 
 
 if __name__ == '__main__':
