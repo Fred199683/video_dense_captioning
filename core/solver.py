@@ -52,7 +52,6 @@ def pack_collate_fn(batch):
     padded_batch_caption_features = torch.from_numpy(padded_batch_caption_features)
     padded_batch_event_features = torch.from_numpy(padded_batch_event_features)
 
-
     return padded_batch_caption_features, padded_batch_event_features, batch_cap_vecs, batch_mask, event_masks
 
 
