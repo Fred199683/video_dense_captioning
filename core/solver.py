@@ -39,6 +39,7 @@ def pack_collate_fn(batch):
     max_event_len = torch.max(event_lens).item()
 
     padded_batch_caption_features = np.zeros((batch_size, max_event_num, max_event_len, feature_dim))
+    print(padded_batch_caption_features.shape)
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
             padded_batch_caption_features[i][j][:len(features)] = features
