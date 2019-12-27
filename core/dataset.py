@@ -1,8 +1,8 @@
-from torch.utils.data.dataset import Dataset
-from torchvision import transforms
-from PIL import Image
-import numpy as np
 import os
+from glob import glob
+
+from torch.utils.data.dataset import Dataset
+import numpy as np
 from .utils import load_json
 
 
@@ -18,8 +18,8 @@ class CocoCaptionDataset(Dataset):
     def __getitem__(self, index):
         video_id = self.video_ids[index]
         item = self.dataset[video_id]
-        feature_path = os.path.join(self.feature_path[self.split], video_id)
-        event_features = [np.load(os.path.join(feature_path, event_feature)) for event_feature in feature_path]
+        event_paths = glob(os.path.join(self.feature_path[self.split], video_id))
+        event_features = [np.load(event_path) for event_path in event_paths]
 
         if self.split == 'train':
             cap_vec = item['sentences']
