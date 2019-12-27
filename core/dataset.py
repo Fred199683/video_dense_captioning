@@ -17,7 +17,7 @@ class CocoCaptionDataset(Dataset):
 
     def __getitem__(self, index):
         video_id = self.video_ids[index]
-        item = self.datset[video_id]
+        item = self.dataset[video_id]
         feature_path = os.path.join(self.feature_path[self.split], video_id)
         event_features = [np.load(os.path.join(feature_path, event_feature)) for event_feature in feature_path]
 
