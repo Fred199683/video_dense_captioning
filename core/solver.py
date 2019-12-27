@@ -24,12 +24,16 @@ def pack_collate_fn(batch):
     # cap_vecs : batch, num_events, caption_length
 
     batch_size, feature_dim = len(batch_features), len(batch_features[0][0][0])
-
-    batch_cap_vecs = torch.tensor(batch_cap_vecs)
+    caption_length = len(batch_cap_vecs[0][0])
 
     # event_nums : batch
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
+
+    padded_batch_cap_vecs = np.zeros((batch_size, max_event_num, caption_length))
+    for i, event_cap_vecs in enumerate(batch_cap_vecs):
+        for j, cap_vecs in enumerate(event_cap_vecs):
+            padded_batch_cap_vecs[i][j] = cap_vecs
 
     padded_batch_event_features = np.zeros((batch_size, max_event_num, feature_dim))
     for i, event_features in enumerate(batch_features):
@@ -41,7 +45,6 @@ def pack_collate_fn(batch):
     max_event_len = torch.max(event_lens).item()
 
     padded_batch_caption_features = np.zeros((batch_size, max_event_num, max_event_len, feature_dim))
-    print(padded_batch_caption_features.shape)
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
             padded_batch_caption_features[i][j][:len(features)] = features
@@ -51,8 +54,9 @@ def pack_collate_fn(batch):
 
     padded_batch_caption_features = torch.from_numpy(padded_batch_caption_features)
     padded_batch_event_features = torch.from_numpy(padded_batch_event_features)
+    padded_batch_cap_vecs = torch.from_numpy(padded_batch_cap_vecs)
 
-    return padded_batch_caption_features, padded_batch_event_features, batch_cap_vecs, batch_mask, event_masks
+    return padded_batch_caption_features, padded_batch_event_features, padded_batch_cap_vecs, batch_mask, event_masks
 
 
 class CaptioningSolver(object):
