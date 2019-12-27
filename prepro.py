@@ -111,7 +111,7 @@ def main():
             for video_id in tqdm(captions_data.keys()):
                 video_feature = f_features[video_id]['c3d_features'].value
                 feature_size = video_feature.shape[0]
-                video_feature = np.pad(video_feature, ((0, 0), (0, (4 - (feature_size % 4)) % 4)))
+                video_feature = np.pad(video_feature, ((0, (4 - (feature_size % 4)) % 4), (0, 0)))
                 video_feature = np.mean(video_feature.reshape(video_feature.shape[0] // 4, -1, video_feature.shape[1]), axis=1)
 
                 video_duration = captions_data[video_id]['duration']
@@ -129,7 +129,7 @@ def main():
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
-            print(max_len)
+                    
 
 
 if __name__ == '__main__':
