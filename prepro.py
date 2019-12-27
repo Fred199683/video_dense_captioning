@@ -126,12 +126,13 @@ def main():
                     begin_pivot = round(begin_timestamp / video_duration * feature_size / 4)
                     end_pivot = round(end_timestamp / video_duration * feature_size / 4)
                     if begin_pivot == end_pivot:
-                        print('warning', begin_timestamp, end_timestamp, event_sentences[i])
+                        #print('warning', begin_timestamp, end_timestamp, event_sentences[i])
                         if max_len < end_timestamp - begin_timestamp:
                             max_len = end_timestamp - begin_timestamp
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
+            print(max_len)
 
 
 if __name__ == '__main__':
