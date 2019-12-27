@@ -107,14 +107,12 @@ def main():
             os.makedirs(feature_path)
 
         with h5py.File(cfg.DATASET.RAW_FEATURE_PATH) as f_features:
-            max_len = 0
             for video_id in tqdm(captions_data.keys()):
                 video_feature = f_features[video_id]['c3d_features'].value
                 feature_size = video_feature.shape[0]
                 video_feature = np.pad(video_feature, ((0, (4 - (feature_size % 4)) % 4), (0, 0)))
-                video_feature = video_feature.reshape(video_feature.shape[0] // 4, -1, video_feature.shape[1])
-                print(video_feature.shape)
-                video_feature = np.mean(video_feature, axis=1)
+                video_feature = np.mean(video_feature.reshape(video_feature.shape[0] // 4, -1, video_feature.shape[1]), axis=1)
+                print(video_feature)
 
                 video_duration = captions_data[video_id]['duration']
                 event_timestamps = captions_data[video_id]['timestamps']
@@ -126,8 +124,6 @@ def main():
                 for i, (begin_timestamp, end_timestamp) in enumerate(event_timestamps):
                     begin_pivot = round(begin_timestamp / video_duration * feature_size / 4)
                     end_pivot = round(end_timestamp / video_duration * feature_size / 4)
-                    if max_len < (end_pivot - begin_pivot):
-                        max_len = end_pivot - begin_pivot
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
