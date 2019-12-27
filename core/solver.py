@@ -29,7 +29,7 @@ def pack_collate_fn(batch):
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums)
 
-    padded_batch_event_features = np.zeros(batch_size, max_event_num, feature_dim)
+    padded_batch_event_features = np.zeros((batch_size, max_event_num, feature_dim))
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
             padded_batch_event_features[i][j] = np.mean(features, axis=0)
@@ -38,7 +38,7 @@ def pack_collate_fn(batch):
     event_lens = torch.tensor([[len(features) for features in event_features] + [0] * (max_event_num - len(event_features)) for event_features in batch_features])
     max_event_len = torch.max(event_lens)
 
-    padded_batch_caption_features = np.zeros(batch_size, max_event_num, max_event_len, feature_dim)
+    padded_batch_caption_features = np.zeros((batch_size, max_event_num, max_event_len, feature_dim))
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
             padded_batch_caption_features[i][j][:len(features)] = features
