@@ -98,7 +98,6 @@ class EventRNN(nn.Module):
         feats_context = p_feats_context + f_feats_context
         feature = features[:, feature_idx, :]
 
-        print(caption_hidden_states.size(), feats_context.size(), feature.size())
         next_input = torch.cat((caption_hidden_states.squeeze(0), feats_context, feature), 1).unsqueeze(0)
 
         output, (next_hidden_states, next_cell_states) = self.lstm_cell(next_input, (hidden_states, cell_states))
@@ -137,6 +136,11 @@ class CaptionRNN(nn.Module):
         # functional layers
         self.features_norm_layer = nn.LayerNorm(self.D)
         self.dropout = nn.Dropout(p=self.dropout)
+
+    def get_initial_lstm(self, event_hidden_states):
+        h = event_hidden_states
+        c = event_hidden_states
+        return c, h
 
     def zero_hidden_states(self, batch_size):
         return torch.zeros(1, batch_size, self.H, device=self.device)

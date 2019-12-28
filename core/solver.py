@@ -244,7 +244,7 @@ class CaptioningSolver(object):
         for event_idx in range(event_features.size(1)):
             e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features, event_features_proj, event_mask,
                                                             e_hidden_states, e_cell_states, c_hidden_states)
-            c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(caption_features[:, event_idx])
+            c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(e_hidden_states)
 
             feats_alphas = []
             loss, acc = 0, 0
