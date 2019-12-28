@@ -54,7 +54,7 @@ def pack_collate_fn(batch):
 
     padded_batch_caption_features = torch.from_numpy(padded_batch_caption_features)
     padded_batch_event_features = torch.from_numpy(padded_batch_event_features)
-    padded_batch_cap_vecs = torch.from_numpy(padded_batch_cap_vecs)
+    padded_batch_cap_vecs = torch.from_numpy(padded_batch_cap_vecs).long()
 
     return padded_batch_caption_features, padded_batch_event_features, padded_batch_cap_vecs, batch_mask, event_masks
 
@@ -229,7 +229,6 @@ class CaptioningSolver(object):
         event_mask = event_mask.to(device=self.device)
         caption_mask = caption_mask.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
-        print(cap_vecs.dtype)
 
         caption_features = self.caption_rnn.normalize(caption_features)
         caption_features_proj = self.caption_rnn.project_features(caption_features)
