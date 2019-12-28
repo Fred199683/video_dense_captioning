@@ -224,12 +224,12 @@ class CaptioningSolver(object):
         self.optimizer.zero_grad()
 
         caption_features, event_features, cap_vecs, event_mask, caption_mask = batch
-        print(cap_vecs.dtype)
         caption_features = caption_features.to(device=self.device)
         event_features = event_features.to(device=self.device)
         event_mask = event_mask.to(device=self.device)
         caption_mask = caption_mask.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
+        print(cap_vecs.dtype)
 
         caption_features = self.caption_rnn.normalize(caption_features)
         caption_features_proj = self.caption_rnn.project_features(caption_features)
