@@ -107,7 +107,7 @@ def main():
             os.makedirs(feature_path)
 
         with h5py.File(cfg.DATASET.RAW_FEATURE_PATH) as f_features:
-            max_len = 0
+            max_len, count = 0, 0
             for video_id in tqdm(captions_data.keys()):
                 video_duration = captions_data[video_id]['duration']
                 event_timestamps = captions_data[video_id]['timestamps']
@@ -116,6 +116,8 @@ def main():
                 video_feature = f_features[video_id]['c3d_features'].value
                 feature_size = video_feature.shape[0]
                 scale_factor = round(feature_size / video_duration)  # To resample features so that every feature represents roughly a second
+                if scale_factor == 0:
+                    print(feature_size, video_duration)
 
                 video_feature = np.pad(video_feature, ((0, (scale_factor - (feature_size % scale_factor)) % scale_factor), (0, 0)))
                 video_feature = np.mean(video_feature.reshape(video_feature.shape[0] // scale_factor, -1, video_feature.shape[1]), axis=1)
@@ -128,13 +130,13 @@ def main():
                     begin_pivot = round(begin_timestamp / video_duration * feature_size / scale_factor)
                     end_pivot = round(end_timestamp / video_duration * feature_size / scale_factor)
                     if begin_pivot == end_pivot:
-                        print('warning', begin_timestamp, end_timestamp)
+                        count += 1
                         if max_len < end_timestamp - begin_timestamp:
                             max_len = end_timestamp - begin_timestamp
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
-            print(max_len)
+            print(max_len, count)
 
 
 if __name__ == '__main__':
