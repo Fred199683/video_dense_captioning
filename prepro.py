@@ -129,7 +129,7 @@ def main():
                         #print('warning', begin_timestamp, end_timestamp, event_sentences[i])
                         if max_len < end_timestamp - begin_timestamp:
                             max_len = end_timestamp - begin_timestamp
-                            print(max_len, begin_timestamp, end_timestamp, begin_pivot, end_pivot)
+                            print(max_len, video_duration / feature_size)
 
                     event_feature = video_feature[begin_pivot: end_pivot, :]
                     np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
