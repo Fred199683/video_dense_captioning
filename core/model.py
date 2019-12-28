@@ -134,10 +134,10 @@ class CaptionRNN(nn.Module):
         self.dropout = nn.Dropout(p=self.dropout)
 
     def project_features(self, features):
-        batch, loc, dim = features.size()
-        features_flat = features.view(-1, dim)
+        batch, event_num, event_len, feature_dim = features.size()
+        features_flat = features.view(-1, feature_dim)
         features_proj = F.relu(self.feats_proj_layer(features_flat))
-        features_proj = features_proj.view(batch, loc, -1)
+        features_proj = features_proj.view(batch, event_num, event_len, -1)
         return features_proj
 
     def normalize(self, x):
