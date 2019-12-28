@@ -46,6 +46,8 @@ class EventRNN(nn.Module):
         # functional layers
         self.features_norm_layer = nn.LayerNorm(self.D)
 
+        self.device = cfg.SOLVER.DEVICE
+
     def get_initial_lstm(self, feats_proj):
         feats_mean = torch.mean(feats_proj, 1)
         h = torch.tanh(self.hidden_state_init_layer(feats_mean)).unsqueeze(0)
@@ -78,13 +80,13 @@ class EventRNN(nn.Module):
     def forward(self, feature_idx, features, features_proj, mask, hidden_states, cell_states, caption_hidden_states):
         if feature_idx == 0:
             batch_size, _, feature_dim = features.size()
-            p_feats_context, p_feats_alpha = torch.zeros(batch_size, feature_dim), torch.zeros(batch_size, 1)
+            p_feats_context, p_feats_alpha = torch.zeros(batch_size, feature_dim, device=self.device), torch.zeros(batch_size, 1, device=self.device)
         else:
             p_feats_context, p_feats_alpha = self._attention_layer(features[:, :feature_idx], features_proj[:, :feature_idx], mask[:, :feature_idx],
                                                                    hidden_states, self.past_attention_layer)
         if feature_idx == mask.size(1):
             batch_size, _, feature_dim = features.size()
-            f_feats_context, f_feats_alpha = torch.zeros(batch_size, feature_dim), torch.zeros(batch_size, 1)
+            f_feats_context, f_feats_alpha = torch.zeros(batch_size, feature_dim, device=self.device), torch.zeros(batch_size, 1, device=self.device)
         else:
             f_feats_context, f_feats_alpha = self._attention_layer(features[:, feature_idx:], features_proj[:, feature_idx:], mask[:, feature_idx:],
                                                                    hidden_states, self.future_attention_layer)
