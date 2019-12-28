@@ -250,10 +250,9 @@ class CaptioningSolver(object):
             loss, acc = 0, 0
             for caption_idx in range(cap_vecs.size(2)):
                 curr_cap_vecs = cap_vecs[:, event_idx, caption_idx]
-                print(curr_cap_vecs.dtype)
 
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:, event_idx], caption_features_proj[:, event_idx], caption_mask,
-                                                                                         curr_cap_vecs, c_hidden_states, c_cell_states)
+                                                                                         c_hidden_states, c_cell_states, curr_cap_vecs)
                 loss += self.word_criterion(logits, cap_vecs)
                 # acc += torch.sum(torch.argmax(logits, dim=-1)[:caption_batch_sizes[caption_idx+1]] == cap_vecs[end_idx:end_idx+caption_batch_sizes[caption_idx+1]])
                 feats_alphas.append(feats_alpha)
