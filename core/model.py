@@ -132,7 +132,7 @@ class CaptionRNN(nn.Module):
         self.dropout = nn.Dropout(p=self.dropout)
 
     def zero_hidden_states(self, batch_size):
-        return torch.zeros(batch_size, self.H)
+        return torch.zeros(1, batch_size, self.H)
 
     def project_features(self, features):
         batch, event_num, event_len, feature_dim = features.size()
