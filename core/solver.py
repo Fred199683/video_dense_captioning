@@ -92,7 +92,7 @@ class CaptioningSolver(object):
         self.results_path = cfg.SOLVER.INFER.RESULT_PATH
         self.capture_scores = kwargs.pop('capture_scores', ['bleu_1', 'bleu_4', 'meteor', 'cider'])
 
-        self.device = cfg.SOLVER.DEVICE
+        self.device = cfg.DEVICE
 
         self.is_test = cfg.TEST.ENABLED and not (cfg.TRAIN.ENABLED or cfg.VAL.ENABLED)
 

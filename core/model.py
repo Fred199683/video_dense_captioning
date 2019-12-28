@@ -46,7 +46,7 @@ class EventRNN(nn.Module):
         # functional layers
         self.features_norm_layer = nn.LayerNorm(self.D)
 
-        self.device = cfg.SOLVER.DEVICE
+        self.device = cfg.DEVICE
 
     def get_initial_lstm(self, feats_proj):
         feats_mean = torch.mean(feats_proj, 1)
@@ -118,6 +118,8 @@ class CaptionRNN(nn.Module):
         self.M = cfg.MODEL.CRNN.D_EMBED
         self.H = cfg.MODEL.CRNN.D_HIDDEN
 
+        self.device = cfg.DEVICE
+
         # Trainable parameters :
         self.lstm_cell = nn.LSTM(self.D + self.M, self.H, dropout=0.5)
         self.embedding_lookup = nn.Embedding(self.V, self.M)
@@ -136,7 +138,7 @@ class CaptionRNN(nn.Module):
         self.dropout = nn.Dropout(p=self.dropout)
 
     def zero_hidden_states(self, batch_size):
-        return torch.zeros(1, batch_size, self.H)
+        return torch.zeros(1, batch_size, self.H, device=self.device)
 
     def project_features(self, features):
         batch, event_num, event_len, feature_dim = features.size()

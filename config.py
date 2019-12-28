@@ -51,7 +51,7 @@ config.SOLVER.INFER.BEAM_SIZE = 3               # beam size being used while inf
 config.SOLVER.INFER.LEN_NORM = 0.4              # length normalization being used while inference
 config.SOLVER.INFER.RESULT_PATH = 'results/results.json'  # path to save results after inference
 
-config.SOLVER.DEVICE = 'cuda:0'  # decide which gpu being used
+config.DEVICE = 'cuda:0'  # decide which gpu being used
 
 config.TRAIN.ENABLED = True  # enable training phrase to be processed in prepro
 config.VAL.ENABLED = True    # enable validating phrase to be processed in prepro or train
