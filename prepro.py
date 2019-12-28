@@ -124,8 +124,14 @@ def main():
                 os.makedirs(video_feature_path)
 
                 for i, (begin_timestamp, end_timestamp) in enumerate(event_timestamps):
-                    begin_pivot = round(begin_timestamp / video_duration * feature_size / scale_factor)
-                    end_pivot = round(end_timestamp / video_duration * feature_size / scale_factor)
+                    t_begin_pivot = round(begin_timestamp / video_duration * feature_size / scale_factor)
+                    t_end_pivot = round(end_timestamp / video_duration * feature_size / scale_factor)
+                    begin_pivot = round(begin_timestamp)
+                    end_pivot = round(end_timestamp)
+                    if begin_pivot != t_begin_pivot:
+                        print('warning different begin: ', begin_pivot, t_begin_pivot)
+                    if end_pivot != t_end_pivot:
+                        print('warning different end: ', end_pivot, t_end_pivot)
                     if begin_pivot == end_pivot:
                         warning_count += 1
                         if max_len < end_timestamp - begin_timestamp:
