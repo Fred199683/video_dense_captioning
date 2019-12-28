@@ -116,9 +116,11 @@ def main():
                 video_feature = f_features[video_id]['c3d_features'].value
                 feature_size = video_feature.shape[0]
                 scale_factor = round(feature_size / video_duration)  # To resample features so that every feature represents roughly a second
-                if scale_factor != 0:
-                    video_feature = np.pad(video_feature, ((0, (scale_factor - (feature_size % scale_factor)) % scale_factor), (0, 0)))
-                    video_feature = np.mean(video_feature.reshape(video_feature.shape[0] // scale_factor, -1, video_feature.shape[1]), axis=1)
+                if scale_factor == 0:
+                    scale_factor += 1
+
+                video_feature = np.pad(video_feature, ((0, (scale_factor - (feature_size % scale_factor)) % scale_factor), (0, 0)))
+                video_feature = np.mean(video_feature.reshape(video_feature.shape[0] // scale_factor, -1, video_feature.shape[1]), axis=1)
 
                 video_feature_path = os.path.join(feature_path, video_id)
                 os.makedirs(video_feature_path)
