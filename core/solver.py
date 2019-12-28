@@ -30,7 +30,7 @@ def pack_collate_fn(batch):
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
 
-    padded_batch_cap_vecs = np.zeros((batch_size, max_event_num, caption_length))
+    padded_batch_cap_vecs = np.zeros((batch_size, max_event_num, caption_length), dtype=np.int64)
     for i, event_cap_vecs in enumerate(batch_cap_vecs):
         for j, cap_vecs in enumerate(event_cap_vecs):
             padded_batch_cap_vecs[i][j] = cap_vecs
