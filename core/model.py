@@ -96,10 +96,10 @@ class EventRNN(nn.Module):
             f_feats_context, f_feats_beta = self._selector(f_feats_context, hidden_states)
 
         feats_context = p_feats_context + f_feats_context
-        feature = features[feature_idx]
+        feature = features[:, feature_idx, :]
 
         print(caption_hidden_states.size(), feats_context.size(), feature.size())
-        next_input = torch.cat((caption_hidden_states, feats_context, feature), 1).unsqueeze(0)
+        next_input = torch.cat((caption_hidden_states.squeeze(0), feats_context, feature), 1).unsqueeze(0)
 
         output, (next_hidden_states, next_cell_states) = self.lstm_cell(next_input, (hidden_states, cell_states))
 
