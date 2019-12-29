@@ -250,7 +250,6 @@ class CaptioningSolver(object):
         losses, accs = 0, 0
 
         for event_idx in range(event_features.size(1)):
-            print(event_idx, event_features.size(1))
             batch_size = batch_sizes[event_idx]
             e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features[:batch_size], event_features_proj[:batch_size], events_mask[:batch_size],
                                                             e_hidden_states[:, :batch_size], e_cell_states[:, :batch_size], c_hidden_states[:, :batch_size])
