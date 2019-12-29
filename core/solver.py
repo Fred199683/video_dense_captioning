@@ -27,7 +27,7 @@ def pack_collate_fn(batch):
     caption_length = len(batch_cap_vecs[0][0])
 
     # sort batch_features on num_events dimension
-    len_sorted_ids = sorted(range(len(batch_size)), key=lambda i: len(batch_size[i]), reverse=True)
+    len_sorted_ids = sorted(range(len(batch_features)), key=lambda i: len(batch_features[i]), reverse=True)
     batch_features = [batch_features[i] for i in len_sorted_ids]
     batch_cap_vecs = [batch_cap_vecs[i] for i in len_sorted_ids]
 
