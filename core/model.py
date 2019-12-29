@@ -20,7 +20,6 @@ import torch.nn.functional as F
 def mask_softmax(preds, mask, dim=-1):
     preds[~mask] = float('-inf')
     preds = F.softmax(preds, dim=dim)
-    preds[~mask] = 0
     print(preds.size())
     return preds
 
