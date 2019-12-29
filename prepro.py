@@ -11,7 +11,8 @@ from shutil import rmtree
 
 
 def process_captions_data(captions_data, max_length=None):
-    all_count, removing_count, empty_count = 0, 0, 0
+    all_count, removing_count = 0, 0
+    empty_videos = []
 
     for video_id, annotation in captions_data.items():
         sentences, timestamps = [], []
@@ -31,11 +32,13 @@ def process_captions_data(captions_data, max_length=None):
         captions_data[video_id]['vectors'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
         if sentences == [] and timestamps == []:
-            captions_data.pop(video_id)
-            empty_count += 1
+            empty_videos.append(video_id)
+
+    for video_id in empty_videos:
+        captions_data.pop(video_id)
 
     print('Removed %d sentences over %d sentences.' % (removing_count, all_count))
-    print('There were %d empty videos removed.' % empty_count)
+    print('There were %d empty videos and they were removed.' % empty_count)
 
     return captions_data
 
