@@ -28,8 +28,8 @@ config.MODEL.ERNN.ENABLE_SELECTOR = True  # set to True to enable a selecting ga
 config.MODEL.ERNN.D_FEATURE = 500         # feature size
 config.MODEL.ERNN.D_HIDDEN = 1024         # RNN hidden size
 
-config.MODEL.CRNN.ENABLE_PREV2OUT = True  # set to True to directly link previous hidden state to current output
-config.MODEL.CRNN.ENABLE_CTX2OUT = True   # set to True to directly link context to current output
+config.MODEL.CRNN.ENABLE_PREV2OUT = False # set to True to directly link previous hidden state to current output
+config.MODEL.CRNN.ENABLE_CTX2OUT = False # set to True to directly link context to current output
 config.MODEL.CRNN.ENABLE_SELECTOR = True  # set to True to enable a selecting gate of context before being fed to RNN
 config.MODEL.CRNN.DROPOUT = 0.5           # dropout proportion of RNN
 config.MODEL.CRNN.D_FEATURE = 500         # feature size
