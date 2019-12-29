@@ -242,7 +242,6 @@ class CaptioningSolver(object):
         losses, accs = 0, 0
 
         for event_idx in range(event_features.size(1)):
-            print(event_idx)
             e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features, event_features_proj, events_mask,
                                                             e_hidden_states, e_cell_states, c_hidden_states)
             c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(e_hidden_states)
