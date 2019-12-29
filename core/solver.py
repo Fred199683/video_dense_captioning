@@ -303,7 +303,7 @@ class CaptioningSolver(object):
             #    feats_alphas_reg = self.alpha_c * self.alpha_criterion(sum_loc_alphas, (seq_lens / self.model.L).repeat(1, self.model.L))
             #    loss += feats_alphas_reg
 
-            loss /= batch_size
+            loss /= caption_features.size(0)
             losses += loss
 
             accs += acc / count_mask
