@@ -38,7 +38,7 @@ def process_captions_data(captions_data, max_length=None):
         captions_data.pop(video_id)
 
     print('Removed %d sentences over %d sentences.' % (removing_count, all_count))
-    print('There were %d empty videos and they were removed.' % empty_count)
+    print('There were %d empty videos and they were removed.' % len(empty_videos))
 
     return captions_data
 
