@@ -20,12 +20,10 @@ class BeamSearchDecoder(object):
         score = F.log_softmax(logits, dim=-1) / length_penalty + beam_scores.unsqueeze(-1)
         return score
 
-    def decode(self, features):
+    def decode(self, features, features_proj, hidden_states, cell_states):
         with torch.no_grad():
-            features = features.to(device=self.device)
-            features = self.model.batch_norm(features)
+            features = self.model.normalize(features)
             features_proj = self.model.project_features(features, self.model.feats_proj_layer)
-            hidden_states, cell_states = self.model.get_initial_lstm(features_proj)
             beam_hidden_states = hidden_states.unsqueeze(0)
             beam_cell_states = cell_states.unsqueeze(0)
 
@@ -45,10 +43,10 @@ class BeamSearchDecoder(object):
 
                 for b in range(beam_size):
                     logits, feats_alpha, tags_alpha, (hidden_states, cell_states) = self.model(features,
-                                                                            features_proj,
-                                                                            beam_inputs[:, b],
-                                                                            beam_hidden_states[b],
-                                                                            beam_cell_states[b])
+                                                                                               features_proj,
+                                                                                               beam_inputs[:, b],
+                                                                                               beam_hidden_states[b],
+                                                                                               beam_cell_states[b])
                     beam_logits.append(logits.detach())
                     next_beam_hidden_states.append(hidden_states.detach())
                     next_beam_cell_states.append(cell_states.detach())

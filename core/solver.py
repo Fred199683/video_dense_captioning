@@ -1,3 +1,4 @@
+from collections import defaultdict
 import torch
 from torch import optim, nn
 from torch.nn import functional as F
@@ -18,11 +19,8 @@ from .model import EventRNN, CaptionRNN
 from config import config as cfg
 
 
-def pack_collate_fn(batch):
+def train_collate(batch):
     batch_features, batch_cap_vecs = zip(*batch)
-    # batch_features : batch, num_events, event_length, feature_dim
-    # cap_vecs : batch, num_events, caption_length
-
     batch_size, feature_dim = len(batch_features), len(batch_features[0][0][0])
     caption_length = len(batch_cap_vecs[0][0])
 
@@ -31,39 +29,66 @@ def pack_collate_fn(batch):
     batch_features = [batch_features[i] for i in len_sorted_ids]
     batch_cap_vecs = [batch_cap_vecs[i] for i in len_sorted_ids]
 
-    # event_nums : batch
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
 
-    padded_batch_cap_vecs = np.zeros((batch_size, max_event_num, caption_length), dtype=np.int64)
+    padded_batch_cap_vecs = torch.zeros(batch_size, max_event_num, caption_length).long()
     for i, event_cap_vecs in enumerate(batch_cap_vecs):
         for j, cap_vecs in enumerate(event_cap_vecs):
-            padded_batch_cap_vecs[i][j] = cap_vecs
+            padded_batch_cap_vecs[i][j] = torch.tensor(cap_vecs).long()
 
-    padded_batch_event_features = np.zeros((batch_size, max_event_num, feature_dim))
+    padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim)
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
-            padded_batch_event_features[i][j] = np.mean(features, axis=0)
+            padded_batch_event_features[i][j] = torch.mean(torch.tensor(features), axis=0)
 
-    # event_lens : batch, max_event_num
     event_lens = torch.tensor([[len(features) for features in event_features] + [0] * (max_event_num - len(event_features)) for event_features in batch_features])
     max_event_len = torch.max(event_lens).item()
 
-    padded_batch_caption_features = np.zeros((batch_size, max_event_num, max_event_len, feature_dim))
+    padded_batch_caption_features = torch.zeros(batch_size, max_event_num, max_event_len, feature_dim)
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
-            padded_batch_caption_features[i][j][:len(features)] = features
+            padded_batch_caption_features[i][j][:len(features)] = torch.tensor(features)
 
     events_mask = torch.arange(max_event_num)[None, :] < event_nums[:, None]
     captions_masks = torch.arange(max_event_len)[None, None, :] < event_lens[:, :, None]
 
     batch_sizes = torch.sum(events_mask, dim=0)
 
-    padded_batch_caption_features = torch.from_numpy(padded_batch_caption_features)
-    padded_batch_event_features = torch.from_numpy(padded_batch_event_features)
-    padded_batch_cap_vecs = torch.from_numpy(padded_batch_cap_vecs).long()
-
     return padded_batch_caption_features, padded_batch_event_features, padded_batch_cap_vecs, events_mask, captions_masks, batch_sizes
+
+
+def infer_collate(batch):
+    batch_features, batch_ids = zip(*batch)
+
+    batch_size, feature_dim = len(batch_features), len(batch_features[0][0][0])
+
+    # sort batch_features on num_events dimension
+    len_sorted_ids = sorted(range(len(batch_features)), key=lambda i: len(batch_features[i]), reverse=True)
+    batch_features = [batch_features[i] for i in len_sorted_ids]
+
+    event_nums = torch.tensor([len(event_features) for event_features in batch_features])
+    max_event_num = torch.max(event_nums).item()
+
+    padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim)
+    for i, event_features in enumerate(batch_features):
+        for j, features in enumerate(event_features):
+            padded_batch_event_features[i][j] = torch.mean(torch.tensor(features), axis=0)
+
+    event_lens = torch.tensor([[len(features) for features in event_features] + [0] * (max_event_num - len(event_features)) for event_features in batch_features])
+    max_event_len = torch.max(event_lens).item()
+
+    padded_batch_caption_features = torch.zeros(batch_size, max_event_num, max_event_len, feature_dim)
+    for i, event_features in enumerate(batch_features):
+        for j, features in enumerate(event_features):
+            padded_batch_caption_features[i][j][:len(features)] = torch.tensor(features)
+
+    events_mask = torch.arange(max_event_num)[None, :] < event_nums[:, None]
+    captions_masks = torch.arange(max_event_len)[None, None, :] < event_lens[:, :, None]
+
+    batch_sizes = torch.sum(events_mask, dim=0)
+
+    return padded_batch_caption_features, padded_batch_event_features, events_mask, captions_masks, batch_sizes, batch_ids
 
 
 class CaptioningSolver(object):
@@ -115,8 +140,8 @@ class CaptioningSolver(object):
             self.init_best_scores = {score_name: 0. for score_name in self.capture_scores}
 
         if not self.is_test:
-            self.train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4, collate_fn=pack_collate_fn)
-            self.val_loader = DataLoader(val_dataset, batch_size=self.batch_size, num_workers=4)
+            self.train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4, collate_fn=train_collate)
+            self.val_loader = DataLoader(val_dataset, batch_size=self.batch_size, num_workers=4, collate_fn=infer_collate)
 
             # set an optimizer by update rule
             params = list(self.event_rnn.parameters()) + list(self.caption_rnn.parameters())
@@ -230,11 +255,11 @@ class CaptioningSolver(object):
         self.caption_rnn.train()
         self.optimizer.zero_grad()
 
-        caption_features, event_features, cap_vecs, event_mask, caption_mask, batch_sizes = batch
+        caption_features, event_features, cap_vecs, events_mask, captions_masks, batch_sizes = batch
         caption_features = caption_features.to(device=self.device)
         event_features = event_features.to(device=self.device)
-        events_mask = event_mask.to(device=self.device)
-        captions_masks = caption_mask.to(device=self.device)
+        events_mask = events_mask.to(device=self.device)
+        captions_masks = captions_masks.to(device=self.device)
         batch_sizes = batch_sizes.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
 
@@ -283,7 +308,7 @@ class CaptioningSolver(object):
         return loss.item(), accs
 
     def testing_start_epoch_handler(self, engine):
-        engine.state.captions = []
+        engine.state.captions = {}
 
     def testing_end_epoch_handler(self, engine, is_test):
         save_json(engine.state.captions, self.results_path)
@@ -297,11 +322,36 @@ class CaptioningSolver(object):
 
     def _test(self, engine, batch):
         self.model.eval()
-        features, video_ids = batch
-        cap_vecs = self.beam_decoder.decode(features)
-        captions = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
-        video_ids = video_ids.numpy()
-        engine.state.captions = engine.state.captions + [{'video_id': int(video_id), 'caption': caption} for video_id, caption in zip(video_ids, captions)]
+
+        caption_features, event_features, events_mask, captions_masks, batch_sizes, video_ids = batch
+        caption_features = caption_features.to(device=self.device)
+        event_features = event_features.to(device=self.device)
+        events_mask = events_mask.to(device=self.device)
+        captions_masks = captions_masks.to(device=self.device)
+        batch_sizes = batch_sizes.to(device=self.device)
+
+        caption_features = self.caption_rnn.normalize(caption_features)
+        caption_features_proj = self.caption_rnn.project_features(caption_features)
+
+        event_features = self.event_rnn.normalize(event_features)
+        event_features_proj = self.event_rnn.project_features(event_features)
+
+        e_hidden_states, e_cell_states = self.event_rnn.get_initial_lstm(event_features_proj)
+        c_hidden_states = self.caption_rnn.zero_hidden_states(batch_size=event_features.size(0))
+
+        predictions = defaultdict(lambda: {'timestamps': [], 'sentences': []})
+        for event_idx in range(event_features.size(1)):
+            batch_size = batch_sizes[event_idx]
+            e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features[:batch_size], event_features_proj[:batch_size], events_mask[:batch_size],
+                                                            e_hidden_states[:, :batch_size], e_cell_states[:, :batch_size], c_hidden_states[:, :batch_size])
+            c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(e_hidden_states)
+            cap_vecs = self.beam_decoder.decode(caption_features[:, event_idx], caption_features_proj[:, event_idx], c_hidden_states, c_cell_states)
+
+            captions = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
+            for video_id, caption in zip(video_ids, captions):
+                predictions[video_id]['sentences'].append(caption)
+
+        engine.state.captions.update(predictions)
 
     def train(self):
         self.train_engine.run(self.train_loader, max_epochs=self.n_epochs)
