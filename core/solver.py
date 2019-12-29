@@ -253,7 +253,7 @@ class CaptioningSolver(object):
             print(event_idx, event_features.size(1))
             batch_size = batch_sizes[event_idx]
             e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features[:batch_size], event_features_proj[:batch_size], events_mask[:batch_size],
-                                                            e_hidden_states[:batch_size], e_cell_states[:batch_size], c_hidden_states[:batch_size])
+                                                            e_hidden_states[:, :batch_size], e_cell_states[:, :batch_size], c_hidden_states[:, :batch_size])
             c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(e_hidden_states)
 
             feats_alphas = []
@@ -264,7 +264,7 @@ class CaptioningSolver(object):
 
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
                                                                                          caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size],
-                                                                                         c_hidden_states[:batch_size], c_cell_states[:batch_size], curr_cap_vecs[:batch_size])
+                                                                                         c_hidden_states[:, :batch_size], c_cell_states[:, :batch_size], curr_cap_vecs[:batch_size])
                 loss += self.word_criterion(logits, cap_vecs[:batch_size, event_idx, caption_idx + 1])
                 # acc += torch.sum(torch.argmax(logits, dim=-1)[:caption_batch_sizes[caption_idx+1]] == cap_vecs[end_idx:end_idx+caption_batch_sizes[caption_idx+1]])
                 feats_alphas.append(feats_alpha)

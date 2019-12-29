@@ -20,7 +20,6 @@ import torch.nn.functional as F
 def mask_softmax(preds, mask, dim=-1):
     preds[~mask] = float('-inf')
     preds = F.softmax(preds, dim=dim)
-    print(preds.size())
     return preds
 
 
@@ -78,7 +77,6 @@ class EventRNN(nn.Module):
         return context, beta
 
     def forward(self, feature_idx, features, features_proj, mask, hidden_states, cell_states, caption_hidden_states):
-        print(features.size(), features_proj.size(), mask.size(), hidden_states.size(), cell_states.size(), caption_hidden_states.size())
         if feature_idx == 0:
             batch_size, _, feature_dim = features.size()
             p_feats_context, p_feats_alpha = torch.zeros(batch_size, feature_dim, device=self.device), torch.zeros(batch_size, 1, device=self.device)
