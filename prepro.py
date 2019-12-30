@@ -158,7 +158,7 @@ def main():
 
                 if phase == 'train':
                     captions_data[video_id]['timestamps'] = new_event_timestamps
-                    captions_data[video_id]['words'] = new_event_sentences
+                    captions_data[video_id]['sentences'] = new_event_sentences
 
             print('Max length of short events: %d' % max_len)
             print('There are %d short events in %d events.' % (warning_count, total_count))
