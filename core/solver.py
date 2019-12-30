@@ -295,10 +295,10 @@ class CaptioningSolver(object):
                 loss += self.word_criterion(logits, next_cap_vecs)
 
                 mask_next_cap_vecs = (next_cap_vecs != self._null)
-                print(caption_idx, mask_next_cap_vecs, next_cap_vecs)
-                for sents in sentences[:batch_size]:
-                    print(sents[event_idx][caption_idx], end=' ')
-                print()
+                # print(caption_idx, mask_next_cap_vecs, next_cap_vecs)
+                # for sents in sentences[:batch_size]:
+                #     print(sents[event_idx][caption_idx], end=' ')
+                # print()
                 acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
                 count_mask += torch.sum(mask_next_cap_vecs).item()
                 # feats_alphas.append(feats_alpha)
