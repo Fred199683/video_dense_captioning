@@ -263,6 +263,7 @@ class CaptioningSolver(object):
         captions_masks = captions_masks.to(device=self.device)
         batch_sizes = batch_sizes.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
+        print(sentences)
 
         caption_features = self.caption_rnn.normalize(caption_features)
         caption_features_proj = self.caption_rnn.project_features(caption_features)
@@ -295,7 +296,6 @@ class CaptioningSolver(object):
                 loss += self.word_criterion(logits, next_cap_vecs)
 
                 mask_next_cap_vecs = (next_cap_vecs != self._null)
-                print(sentences[:batch_size][event_idx][caption_idx])
                 print(caption_idx, mask_next_cap_vecs, next_cap_vecs)
                 for b_sents in sentences[:batch_size]:
                     for b_sent in b_sents[event_idx]:
