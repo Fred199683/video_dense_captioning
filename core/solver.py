@@ -296,7 +296,7 @@ class CaptioningSolver(object):
 
                 mask_next_cap_vecs = (next_cap_vecs != self._null)
                 #print(caption_idx, mask_next_cap_vecs)
-                print(sentences[:][event_idx][:])
+                print(sentences[:][event_idx][caption_idx])
                 print(mask_next_cap_vecs, next_cap_vecs)
                 acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
                 count_mask += torch.sum(mask_next_cap_vecs).item()
