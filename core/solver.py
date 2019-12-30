@@ -263,7 +263,6 @@ class CaptioningSolver(object):
         captions_masks = captions_masks.to(device=self.device)
         batch_sizes = batch_sizes.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
-        print(sentences)
 
         caption_features = self.caption_rnn.normalize(caption_features)
         caption_features_proj = self.caption_rnn.project_features(caption_features)
@@ -297,6 +296,8 @@ class CaptioningSolver(object):
 
                 mask_next_cap_vecs = (next_cap_vecs != self._null)
                 #print(caption_idx, mask_next_cap_vecs)
+                print(sentences[:][event_idx][:])
+                print(mask_next_cap_vecs, next_cap_vecs)
                 acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
                 count_mask += torch.sum(mask_next_cap_vecs).item()
                 # feats_alphas.append(feats_alpha)
