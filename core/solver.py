@@ -28,7 +28,7 @@ def train_collate(batch):
     len_sorted_ids = sorted(range(len(batch_features)), key=lambda i: len(batch_features[i]), reverse=True)
     batch_features = [batch_features[i] for i in len_sorted_ids]
     batch_cap_vecs = [batch_cap_vecs[i] for i in len_sorted_ids]
-    batch_sentences = [np.array(batch_sentences[i]) for i in len_sorted_ids]
+    batch_sentences = [batch_sentences[i] for i in len_sorted_ids]
 
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
@@ -56,8 +56,6 @@ def train_collate(batch):
 
     batch_sizes = torch.sum(events_mask, dim=0)
 
-    print(padded_batch_cap_vecs.size())
-    print([sentences.shape for sentences in batch_sentences])
     return padded_batch_caption_features, padded_batch_event_features, padded_batch_cap_vecs, events_mask, captions_masks, batch_sizes, batch_sentences
 
 
@@ -297,9 +295,8 @@ class CaptioningSolver(object):
                 loss += self.word_criterion(logits, next_cap_vecs)
 
                 mask_next_cap_vecs = (next_cap_vecs != self._null)
-                #print(caption_idx, mask_next_cap_vecs)
-                print(sentences[:batch_size, event_idx, caption_idx])
-                print(mask_next_cap_vecs, next_cap_vecs)
+                print(sentences[:batch_size][event_idx][caption_idx])
+                print(caption_idx, mask_next_cap_vecs, next_cap_vecs)
                 acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
                 count_mask += torch.sum(mask_next_cap_vecs).item()
                 # feats_alphas.append(feats_alpha)
