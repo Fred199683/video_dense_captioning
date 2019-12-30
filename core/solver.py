@@ -58,6 +58,7 @@ def train_collate(batch):
 
     print(padded_batch_cap_vecs.size())
     print(batch_sentences.shape)
+    print(batch_sentences)
     return padded_batch_caption_features, padded_batch_event_features, padded_batch_cap_vecs, events_mask, captions_masks, batch_sizes, batch_sentences
 
 
