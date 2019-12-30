@@ -40,8 +40,8 @@ def train_collate(batch):
                 padded_batch_cap_vecs[i][j] = torch.tensor(cap_vecs).long()
             except:
                 print(i, j)
-                print(cap_vecs)
                 print(batch_size, max_event_num, caption_length)
+                print(len(event_cap_vecs))
                 return
 
     padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim)
