@@ -164,6 +164,12 @@ def main():
             print('There are %d short events in %d events.' % (warning_count, total_count))
             print('There are %d empty videos being removed.' % len(empty_videos))
 
+        for video_id, annotation in captions_data.items():
+            if len(annotation['timestamps']) != len(annotation['sentences']):
+                print('error in sentences in %s.' % video_id)
+            if len(annotation['timestamps']) != len(annotation['vectors']):
+                print('error in sentences in %s.' % video_id)
+
         if phase == 'train':
             save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
 
