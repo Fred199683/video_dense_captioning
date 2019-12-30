@@ -168,7 +168,7 @@ def main():
             if len(annotation['timestamps']) != len(annotation['sentences']):
                 print('error in sentences in %s.' % video_id)
             if len(annotation['timestamps']) != len(annotation['vectors']):
-                print('error in sentences in %s.' % video_id)
+                print('error in vectors in %s.' % video_id)
 
         if phase == 'train':
             save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
