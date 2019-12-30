@@ -90,7 +90,7 @@ def build_caption_vector(captions_data, word_to_idx, vocab_size=30):
                 words.append('<NULL>')
 
             captions_data[video_id]['vectors'].append(cap_vec)
-            captions_data[video_id]['words'][i] = words
+            captions_data[video_id]['sentences'][i] = words
 
     print('Finished building train caption vectors.')
     return captions_data
