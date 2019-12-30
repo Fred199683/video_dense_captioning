@@ -34,7 +34,9 @@ def train_collate(batch):
     max_event_num = torch.max(event_nums).item()
 
     padded_batch_cap_vecs = torch.zeros(batch_size, max_event_num, caption_length).long()
-    for i, event_cap_vecs in enumerate(batch_cap_vecs): for j, cap_vecs in enumerate(event_cap_vecs): padded_batch_cap_vecs[i][j] = torch.tensor(cap_vecs).long()
+    for i, event_cap_vecs in enumerate(batch_cap_vecs):
+        for j, cap_vecs in enumerate(event_cap_vecs):
+            padded_batch_cap_vecs[i][j] = torch.tensor(cap_vecs).long()
 
     padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim)
     for i, event_features in enumerate(batch_features):
