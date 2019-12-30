@@ -69,6 +69,7 @@ def build_vocab(captions_data, threshold=1, vocab_size=None):
 
 def build_caption_vector(captions_data, word_to_idx, vocab_size=30):
     for video_id, annotation in captions_data.items():
+        captions_data[video_id]['vectors'] = []
         for i, sentence in enumerate(annotation['words']):
             cap_vec = [word_to_idx['<START>']]
             words = ['<START>']
@@ -88,7 +89,7 @@ def build_caption_vector(captions_data, word_to_idx, vocab_size=30):
                 cap_vec.append(word_to_idx['<NULL>'])
                 words.append('<NULL>')
 
-            captions_data[video_id]['vectors'][i] = cap_vec
+            captions_data[video_id]['vectors'].append(cap_vec)
             captions_data[video_id]['words'][i] = words
 
     print('Finished building train caption vectors.')
