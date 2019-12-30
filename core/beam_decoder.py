@@ -13,7 +13,7 @@ class BeamSearchDecoder(object):
         self.beam_size = cfg.SOLVER.INFER.BEAM_SIZE
         self.length_norm = cfg.SOLVER.INFER.LEN_NORM
 
-        self.device = cfg.SOLVER.DEVICE
+        self.device = cfg.DEVICE
 
     def compute_score(self, logits, beam_scores, time_step):
         length_penalty = ((5. + time_step)**self.length_norm) / (6.**self.length_norm)
