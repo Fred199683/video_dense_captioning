@@ -22,8 +22,6 @@ class BeamSearchDecoder(object):
 
     def decode(self, features, features_proj, hidden_states, cell_states):
         with torch.no_grad():
-            features = self.model.normalize(features)
-            features_proj = self.model.project_features(features, self.model.feats_proj_layer)
             beam_hidden_states = hidden_states.unsqueeze(0)
             beam_cell_states = cell_states.unsqueeze(0)
 
