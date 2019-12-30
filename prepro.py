@@ -105,8 +105,6 @@ def main():
             word_to_idx = build_vocab(captions_data, threshold=cfg.DATASET.VOCAB_THRESHOLD, vocab_size=cfg.DATASET.VOCAB_SIZE)
             save_json(word_to_idx, cfg.DATASET.VOCAB_PATH)
 
-            captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx)
-
         if os.path.isdir(feature_path):
             rmtree(feature_path)
             os.makedirs(feature_path)
@@ -164,14 +162,15 @@ def main():
             print('There are %d short events in %d events.' % (warning_count, total_count))
             print('There are %d empty videos being removed.' % len(empty_videos))
 
+        if phase == 'train':
+            captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx)
+            save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
+
         for video_id, annotation in captions_data.items():
             if len(annotation['timestamps']) != len(annotation['sentences']):
                 print('error in sentences in %s.' % video_id)
             if len(annotation['timestamps']) != len(annotation['vectors']):
                 print('error in vectors in %s.' % video_id)
-
-        if phase == 'train':
-            save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
 
 
 if __name__ == '__main__':
