@@ -20,7 +20,7 @@ from config import config as cfg
 
 
 def train_collate(batch):
-    batch_features, batch_cap_vecs = zip(*batch)
+    batch_features, batch_cap_vecs, batch_sentences = zip(*batch)
     batch_size, feature_dim = len(batch_features), len(batch_features[0][0][0])
     caption_length = len(batch_cap_vecs[0][0])
 
@@ -28,6 +28,7 @@ def train_collate(batch):
     len_sorted_ids = sorted(range(len(batch_features)), key=lambda i: len(batch_features[i]), reverse=True)
     batch_features = [batch_features[i] for i in len_sorted_ids]
     batch_cap_vecs = [batch_cap_vecs[i] for i in len_sorted_ids]
+    batch_sentences = [batch_sentences[i] for i in len_sorted_ids]
 
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
@@ -55,7 +56,7 @@ def train_collate(batch):
 
     batch_sizes = torch.sum(events_mask, dim=0)
 
-    return padded_batch_caption_features, padded_batch_event_features, padded_batch_cap_vecs, events_mask, captions_masks, batch_sizes
+    return padded_batch_caption_features, padded_batch_event_features, padded_batch_cap_vecs, events_mask, captions_masks, batch_sizes, sentences
 
 
 def infer_collate(batch):
@@ -255,14 +256,14 @@ class CaptioningSolver(object):
         self.caption_rnn.train()
         self.optimizer.zero_grad()
 
-        caption_features, event_features, cap_vecs, events_mask, captions_masks, batch_sizes = batch
+        caption_features, event_features, cap_vecs, events_mask, captions_masks, batch_sizes, sentences = batch
         caption_features = caption_features.to(device=self.device)
         event_features = event_features.to(device=self.device)
         events_mask = events_mask.to(device=self.device)
         captions_masks = captions_masks.to(device=self.device)
         batch_sizes = batch_sizes.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
-        print(cap_vecs)
+        print(sentences)
 
         caption_features = self.caption_rnn.normalize(caption_features)
         caption_features_proj = self.caption_rnn.project_features(caption_features)
