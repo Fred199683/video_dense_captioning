@@ -42,6 +42,7 @@ def train_collate(batch):
                 print(i, j)
                 print(cap_vecs)
                 print(batch_size, max_event_num, caption_length)
+                return
 
     padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim)
     for i, event_features in enumerate(batch_features):
