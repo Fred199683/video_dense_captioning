@@ -23,8 +23,8 @@ class CocoCaptionDataset(Dataset):
 
         if self.split == 'train':
             cap_vec = item['vectors']
-            sentences = item['sentences']
-            return event_features, cap_vec, sentences
+            words = item['words']
+            return event_features, cap_vec, words
         return event_features, video_id
 
     def __len__(self, ):

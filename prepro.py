@@ -29,7 +29,7 @@ def process_captions_data(captions_data, max_length=None):
             else:
                 removing_count += 1
 
-        captions_data[video_id]['vectors'] = sentences
+        captions_data[video_id]['words'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
         if sentences == [] and timestamps == []:
             empty_videos.append(video_id)
@@ -46,7 +46,7 @@ def process_captions_data(captions_data, max_length=None):
 def build_vocab(captions_data, threshold=1, vocab_size=None):
     counter = Counter()
     for annotation in captions_data.values():
-        for sentence in annotation['vectors']:
+        for sentence in annotation['words']:
             words = sentence.split(' ')  # caption contrains only lower-case words
             for word in sentence.split(' '):
                 counter[word] += 1
@@ -69,21 +69,27 @@ def build_vocab(captions_data, threshold=1, vocab_size=None):
 
 def build_caption_vector(captions_data, word_to_idx, vocab_size=30):
     for video_id, annotation in captions_data.items():
-        for i, sentence in enumerate(annotation['vectors']):
+        for i, sentence in enumerate(annotation['words']):
             cap_vec = [word_to_idx['<START>']]
+            words = ['<START>']
 
             for word in sentence.split(' '):  # caption contains only lower-case words
                 if word in word_to_idx.keys():
                     cap_vec.append(word_to_idx[word])
+                    words.append(word)
                 else:
                     cap_vec.append(word_to_idx['<UNK>'])
+                    words.append('<UNK>')
 
             cap_vec.append(word_to_idx['<END>'])
+            words.append('<END>')
 
             while len(cap_vec) < vocab_size + 2:
                 cap_vec.append(word_to_idx['<NULL>'])
+                words.append('<NULL>')
 
             captions_data[video_id]['vectors'][i] = cap_vec
+            captions_data[video_id]['words'][i] = words
 
     print('Finished building train caption vectors.')
     return captions_data
