@@ -26,6 +26,9 @@ def train_collate(batch):
 
     # sort batch_features on num_events dimension
     len_sorted_ids = sorted(range(len(batch_features)), key=lambda i: len(batch_features[i]), reverse=True)
+    test_sorted_ids = sorted(range(len(batch_sentences)), key=lambda i: len(batch_sentences[i]), reverse=True)
+    print(len_sorted_ids)
+    print(test_sorted_ids)
     batch_features = [batch_features[i] for i in len_sorted_ids]
     batch_cap_vecs = [batch_cap_vecs[i] for i in len_sorted_ids]
     batch_sentences = [batch_sentences[i] for i in len_sorted_ids]
