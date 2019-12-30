@@ -166,12 +166,6 @@ def main():
             captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx)
             save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
 
-        for video_id, annotation in captions_data.items():
-            if len(annotation['timestamps']) != len(annotation['sentences']):
-                print('error in sentences in %s.' % video_id)
-            if len(annotation['timestamps']) != len(annotation['vectors']):
-                print('error in vectors in %s.' % video_id)
-
 
 if __name__ == '__main__':
     main()
