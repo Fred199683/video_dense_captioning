@@ -31,8 +31,7 @@ def process_captions_data(captions_data, max_length=None):
         captions_data[video_id]['sentences'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
 
-    print('Removed %d sentences over %d sentences.' % (removing_count, all_count))
-
+    print('Removed %d sentences in %d sentences for being longer than %d.' % (removing_count, all_count, max_length))
     return captions_data
 
 
@@ -161,7 +160,7 @@ def main():
             for video_id in empty_videos:
                 captions_data.pop(video_id)
 
-            print('Max length of short events: %d' % max_len)
+            print('Max length of short events: %f' % max_len)
             print('There are %d short events in %d events.' % (warning_count, total_count))
             print('There are %d empty videos being removed.' % len(empty_videos))
 
