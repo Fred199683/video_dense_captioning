@@ -28,7 +28,7 @@ def train_collate(batch):
     len_sorted_ids = sorted(range(len(batch_features)), key=lambda i: len(batch_features[i]), reverse=True)
     batch_features = [batch_features[i] for i in len_sorted_ids]
     batch_cap_vecs = [batch_cap_vecs[i] for i in len_sorted_ids]
-    batch_sentences = np.array([batch_sentences[i] for i in len_sorted_ids])
+    batch_sentences = np.array([np.array(batch_sentences[i]) for i in len_sorted_ids])
 
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
