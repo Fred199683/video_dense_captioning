@@ -12,7 +12,6 @@ from shutil import rmtree
 
 def process_captions_data(captions_data, max_length=None):
     all_count, removing_count = 0, 0
-    empty_videos = []
 
     for video_id, annotation in captions_data.items():
         sentences, timestamps = [], []
@@ -31,14 +30,8 @@ def process_captions_data(captions_data, max_length=None):
 
         captions_data[video_id]['sentences'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
-        if sentences == [] and timestamps == []:
-            empty_videos.append(video_id)
-
-    for video_id in empty_videos:
-        captions_data.pop(video_id)
 
     print('Removed %d sentences over %d sentences.' % (removing_count, all_count))
-    print('There were %d empty videos and they were removed.' % len(empty_videos))
 
     return captions_data
 
@@ -121,6 +114,8 @@ def main():
 
         with h5py.File(cfg.DATASET.RAW_FEATURE_PATH) as f_features:
             max_len, warning_count, total_count = 0, 0, 0
+            empty_videos = []
+
             for video_id in tqdm(captions_data.keys()):
                 video_duration = captions_data[video_id]['duration']
                 event_timestamps = captions_data[video_id]['timestamps']
@@ -160,8 +155,15 @@ def main():
                     captions_data[video_id]['timestamps'] = new_event_timestamps
                     captions_data[video_id]['sentences'] = new_event_sentences
 
+                if new_event_sentences == [] and new_event_timestamps == []:
+                    empty_videos.append(video_id)
+
+            for video_id in empty_videos:
+                captions_data.pop(video_id)
+
             print('Max length of short events: %d' % max_len)
             print('There are %d short events in %d events.' % (warning_count, total_count))
+            print('There are %d empty videos being removed.' % len(empty_videos))
 
         if phase == 'train':
             save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
