@@ -107,6 +107,14 @@ def main():
 
         captions_data = load_json(caption_path)
 
+        if phase == 'train':
+            captions_data = process_captions_data(captions_data, max_length=cfg.DATASET.SEQUENCE_LENGTH)
+
+            word_to_idx = build_vocab(captions_data, threshold=cfg.DATASET.VOCAB_THRESHOLD, vocab_size=cfg.DATASET.VOCAB_SIZE)
+            save_json(word_to_idx, cfg.DATASET.VOCAB_PATH)
+
+            captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx)
+
         if os.path.isdir(feature_path):
             rmtree(feature_path)
             os.makedirs(feature_path)
@@ -116,7 +124,7 @@ def main():
             for video_id in tqdm(captions_data.keys()):
                 video_duration = captions_data[video_id]['duration']
                 event_timestamps = captions_data[video_id]['timestamps']
-                event_sentences = captions_data[video_id]['sentences']
+                event_sentences = captions_data[video_id]['words']
 
                 video_feature = f_features[video_id]['c3d_features'].value
                 feature_size = video_feature.shape[0]
@@ -135,6 +143,7 @@ def main():
                 for i, (begin_timestamp, end_timestamp) in enumerate(event_timestamps):
                     begin_pivot = round(begin_timestamp / video_duration * feature_size / scale_factor)
                     end_pivot = round(end_timestamp / video_duration * feature_size / scale_factor)
+
                     if begin_pivot != end_pivot:
                         event_feature = video_feature[begin_pivot: end_pivot, :]
                         np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
@@ -149,18 +158,12 @@ def main():
 
                 if phase == 'train':
                     captions_data[video_id]['timestamps'] = new_event_timestamps
-                    captions_data[video_id]['sentences'] = new_event_sentences
+                    captions_data[video_id]['words'] = new_event_sentences
 
             print('Max length of short events: %d' % max_len)
             print('There are %d short events in %d events.' % (warning_count, total_count))
 
         if phase == 'train':
-            captions_data = process_captions_data(captions_data, max_length=cfg.DATASET.SEQUENCE_LENGTH)
-
-            word_to_idx = build_vocab(captions_data, threshold=cfg.DATASET.VOCAB_THRESHOLD, vocab_size=cfg.DATASET.VOCAB_SIZE)
-            save_json(word_to_idx, cfg.DATASET.VOCAB_PATH)
-
-            captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx)
             save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
 
 
