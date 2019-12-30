@@ -56,7 +56,7 @@ def train_collate(batch):
 
     batch_sizes = torch.sum(events_mask, dim=0)
 
-    return padded_batch_caption_features, padded_batch_event_features, padded_batch_cap_vecs, events_mask, captions_masks, batch_sizes, sentences
+    return padded_batch_caption_features, padded_batch_event_features, padded_batch_cap_vecs, events_mask, captions_masks, batch_sizes, batch_sentences
 
 
 def infer_collate(batch):
