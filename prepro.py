@@ -29,7 +29,7 @@ def process_captions_data(captions_data, max_length=None):
             else:
                 removing_count += 1
 
-        captions_data[video_id]['words'] = sentences
+        captions_data[video_id]['sentences'] = sentences
         captions_data[video_id]['timestamps'] = timestamps
         if sentences == [] and timestamps == []:
             empty_videos.append(video_id)
@@ -46,7 +46,7 @@ def process_captions_data(captions_data, max_length=None):
 def build_vocab(captions_data, threshold=1, vocab_size=None):
     counter = Counter()
     for annotation in captions_data.values():
-        for sentence in annotation['words']:
+        for sentence in annotation['sentences']:
             words = sentence.split(' ')  # caption contrains only lower-case words
             for word in sentence.split(' '):
                 counter[word] += 1
@@ -70,7 +70,7 @@ def build_vocab(captions_data, threshold=1, vocab_size=None):
 def build_caption_vector(captions_data, word_to_idx, vocab_size=30):
     for video_id, annotation in captions_data.items():
         captions_data[video_id]['vectors'] = []
-        for i, sentence in enumerate(annotation['words']):
+        for i, sentence in enumerate(annotation['sentences']):
             cap_vec = [word_to_idx['<START>']]
             words = ['<START>']
 
@@ -124,9 +124,9 @@ def main():
             for video_id in tqdm(captions_data.keys()):
                 video_duration = captions_data[video_id]['duration']
                 event_timestamps = captions_data[video_id]['timestamps']
-                event_sentences = captions_data[video_id]['words']
+                event_sentences = captions_data[video_id]['sentences']
 
-                video_feature = f_features[video_id]['c3d_features'].value
+                video_feature = f_features[video_id]['c3d_features'][()]
                 feature_size = video_feature.shape[0]
                 scale_factor = round(feature_size / video_duration)  # To resample features so that every feature represents roughly a second
                 if scale_factor == 0:

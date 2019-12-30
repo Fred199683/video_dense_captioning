@@ -23,7 +23,7 @@ class CocoCaptionDataset(Dataset):
 
         if self.split == 'train':
             cap_vec = item['vectors']
-            words = item['words']
+            words = item['sentences']
             return event_features, cap_vec, words
         return event_features, video_id
 
