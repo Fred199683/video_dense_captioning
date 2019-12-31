@@ -41,11 +41,11 @@ class BeamSearchDecoder(object):
 
                 for b in range(beam_size):
                     logits, feats_alpha, (hidden_states, cell_states) = self.model(features,
-                                                                                               features_proj,
-                                                                                               mask,
-                                                                                               beam_hidden_states[b],
-                                                                                               beam_cell_states[b],
-                                                                                               beam_inputs[:, b])
+                                                                                   features_proj,
+                                                                                   mask,
+                                                                                   beam_hidden_states[b],
+                                                                                   beam_cell_states[b],
+                                                                                   beam_inputs[:, b])
                     beam_logits.append(logits.detach())
                     next_beam_hidden_states.append(hidden_states.detach())
                     next_beam_cell_states.append(cell_states.detach())
@@ -69,6 +69,7 @@ class BeamSearchDecoder(object):
                                           self._end, dtype=torch.int64, device=self.device)], -1)
 
                 cand_mask = (done_scores_max >= beam_scores[:, -1])
+                print(cand_mask.type(), cand_finished.type(), done_scores_max.type(), cand_scores.type())
                 cand_mask = (cand_mask & ~cand_finished) | ((cand_mask ^ ~cand_finished) & (done_scores_max > cand_scores))
                 cand_finished = cand_mask | cand_finished
                 cand_symbols = torch.where(cand_mask.unsqueeze(-1), done_symbols, cand_symbols)
