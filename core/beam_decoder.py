@@ -40,7 +40,7 @@ class BeamSearchDecoder(object):
                 beam_logits, next_beam_hidden_states, next_beam_cell_states = [], [], []
 
                 for b in range(beam_size):
-                    logits, feats_alpha, tags_alpha, (hidden_states, cell_states) = self.model(features,
+                    logits, feats_alpha, (hidden_states, cell_states) = self.model(features,
                                                                                                features_proj,
                                                                                                mask,
                                                                                                beam_hidden_states[b],
