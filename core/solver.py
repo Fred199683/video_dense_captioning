@@ -60,13 +60,15 @@ def train_collate(batch):
 
 
 def infer_collate(batch):
-    batch_features, batch_ids = zip(*batch)
+    batch_features, batch_timestamps, batch_ids = zip(*batch)
 
     batch_size, feature_dim = len(batch_features), len(batch_features[0][0][0])
 
     # sort batch_features on num_events dimension
     len_sorted_ids = sorted(range(len(batch_features)), key=lambda i: len(batch_features[i]), reverse=True)
+    batch_ids = [batch_ids[i] for i in len_sorted_ids]
     batch_features = [batch_features[i] for i in len_sorted_ids]
+    batch_timestamps = [batch_timestamps[i] for i in len_sorted_ids]
 
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
@@ -89,7 +91,7 @@ def infer_collate(batch):
 
     batch_sizes = torch.sum(events_mask, dim=0)
 
-    return padded_batch_caption_features, padded_batch_event_features, events_mask, captions_masks, batch_sizes, batch_ids
+    return padded_batch_caption_features, padded_batch_event_features, events_mask, captions_masks, batch_sizes, batch_timestamps, batch_ids
 
 
 class CaptioningSolver(object):
@@ -320,10 +322,10 @@ class CaptioningSolver(object):
         return loss.item(), accs
 
     def testing_start_epoch_handler(self, engine):
-        engine.state.captions = {}
+        engine.state.annotations = {}
 
     def testing_end_epoch_handler(self, engine, is_test):
-        save_json(engine.state.captions, self.results_path)
+        save_json(engine.state.annotations, self.results_path)
         if not is_test:
             print('-' * 40)
             caption_scores = evaluate(candidate_path=self.results_path, get_scores=True)
@@ -336,7 +338,7 @@ class CaptioningSolver(object):
         self.event_rnn.eval()
         self.caption_rnn.eval()
 
-        caption_features, event_features, events_mask, captions_masks, batch_sizes, video_ids = batch
+        caption_features, event_features, events_mask, captions_masks, batch_sizes, timestamps, video_ids = batch
         caption_features = caption_features.to(device=self.device)
         event_features = event_features.to(device=self.device)
         events_mask = events_mask.to(device=self.device)
@@ -364,10 +366,13 @@ class CaptioningSolver(object):
             cap_vecs = self.beam_decoder.decode(caption_features[:batch_size, event_idx], caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size], c_hidden_states, c_cell_states)
 
             captions = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
-            for video_id, caption in zip(video_ids, captions):
+            print(cap_vecs.cpu().numpy()[0])
+            print(captions[0])
+            for video_id, timestamp, caption in zip(video_ids, timestamps, captions):
                 predictions[video_id]['sentences'].append(caption)
+                predictions[video_id]['timestamps'].append(timestamp)
 
-        engine.state.captions.update(predictions)
+        engine.state.annotations.update(predictions)
 
     def train(self):
         self.train_engine.run(self.train_loader, max_epochs=self.n_epochs)
