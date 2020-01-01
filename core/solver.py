@@ -68,9 +68,7 @@ def infer_collate(batch):
     len_sorted_ids = sorted(range(len(batch_features)), key=lambda i: len(batch_features[i]), reverse=True)
     batch_ids = [batch_ids[i] for i in len_sorted_ids]
     batch_features = [batch_features[i] for i in len_sorted_ids]
-    print(batch_timestamps[0])
     batch_timestamps = [batch_timestamps[i] for i in len_sorted_ids]
-    print(batch_timestamps[0])
 
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
@@ -294,15 +292,12 @@ class CaptioningSolver(object):
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
                                                                                          caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size],
                                                                                          c_hidden_states[:, :batch_size], c_cell_states[:, :batch_size], curr_cap_vecs[:batch_size])
+                print(logits.size())
 
                 next_cap_vecs = cap_vecs[:batch_size, event_idx, caption_idx + 1]
                 loss += self.word_criterion(logits, next_cap_vecs)
 
                 mask_next_cap_vecs = (next_cap_vecs != self._null)
-                # print(caption_idx, mask_next_cap_vecs, next_cap_vecs)
-                # for sents in sentences[:batch_size]:
-                #     print(sents[event_idx][caption_idx], end=' ')
-                # print()
                 acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
                 count_mask += torch.sum(mask_next_cap_vecs).item()
                 # feats_alphas.append(feats_alpha)
