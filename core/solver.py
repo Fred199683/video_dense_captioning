@@ -320,8 +320,8 @@ class CaptioningSolver(object):
         self.optimizer.step()
         accs = accs / event_features.size(1)
 
-        print(decode_captions(sample_captions, self.idx_to_word))
-        print(decode_captions(cap_vecs[0], self.idx_to_word))
+        print(decode_captions(np.array(sample_captions), self.idx_to_word))
+        print(decode_captions(cap_vecs[0].cpu().numpy(), self.idx_to_word))
 
         return loss.item(), accs
 
