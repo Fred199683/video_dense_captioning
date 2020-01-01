@@ -68,7 +68,9 @@ def infer_collate(batch):
     len_sorted_ids = sorted(range(len(batch_features)), key=lambda i: len(batch_features[i]), reverse=True)
     batch_ids = [batch_ids[i] for i in len_sorted_ids]
     batch_features = [batch_features[i] for i in len_sorted_ids]
+    print(batch_timestamps[0])
     batch_timestamps = [batch_timestamps[i] for i in len_sorted_ids]
+    print(batch_timestamps[0])
 
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
@@ -366,8 +368,6 @@ class CaptioningSolver(object):
             cap_vecs = self.beam_decoder.decode(caption_features[:batch_size, event_idx], caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size], c_hidden_states, c_cell_states)
 
             captions = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
-            print(cap_vecs.cpu().numpy()[0])
-            print(captions[0])
             for video_id, timestamp, caption in zip(video_ids, timestamps, captions):
                 predictions[video_id]['sentences'].append(caption)
                 predictions[video_id]['timestamps'].append(timestamp)
