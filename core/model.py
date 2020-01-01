@@ -15,12 +15,16 @@ from __future__ import division
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import sys
 
 
 def mask_softmax(preds, mask, dim=-1):
     preds[~mask] = float('-inf')
     preds = F.softmax(preds, dim=dim)
     preds = preds.masked_fill(~mask, 0)
+    if torch.sum(torch.isnan(preds)) > 0:
+        print(preds)
+        sys.exit()
     return preds
 
 
