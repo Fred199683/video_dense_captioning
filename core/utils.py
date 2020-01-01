@@ -2,10 +2,7 @@ import numpy as np
 import json
 import time
 import os
-import sys
-sys.path.append('../../coco-caption')
-from pycocoevalcap.eval import COCOEvalCap
-from pycocotools.coco import COCO
+from densevid_eval.evaluate import ANETcaptions
 
 
 def decode_captions(captions, idx_to_word):
@@ -49,16 +46,28 @@ def save_json(data, path):
         json.dump(data, f)
 
 
-def evaluate(candidate_path='./data/val/val.candidate.captions.json', reference_path='./data/val/captions_val2017.json', get_scores=False):
-    # load caption data
-    ref = COCO(reference_path)
-    hypo = ref.loadRes(candidate_path)
+def evaluate(candidate_path='./data/val/val.candidate.captions.json', references_path=['data/val_1.json', 'data/val_2.json'], get_scores=False):
+    evaluator = ANETcaptions(ground_truth_filenames=references_path,
+                            prediction_filename=candidate_path,
+                            tious=[0.3, 0.5, 0.7, 0.9],
+                            max_proposals=1000,
+                            verbose=False)
+    evaluator.evaluate()
 
-    cocoEval = COCOEvalCap(ref, hypo)
-    cocoEval.evaluate()
-    final_scores = {}
-    for metric, score in cocoEval.eval.items():
-        final_scores[metric.lower()] = score
+    # Output the results
+    # if args.verbose:
+    #     for i, tiou in enumerate(args.tious):
+    #         print '-' * 80
+    #         print "tIoU: " , tiou
+    #         print '-' * 80
+    #         for metric in evaluator.scores:
+    #             score = evaluator.scores[metric][i]
+    #             print '| %s: %2.4f'%(metric, 100*score)
 
-    if get_scores:
-        return final_scores
+    # Print the averages
+    # print('-' * 80)
+    # print('Average across all tIoUs')
+    # print('-' * 80)
+    # for metric in evaluator.scores:
+    #     score = evaluator.scores[metric]
+    #     print('| %s: %2.4f' % (metric, 100 * sum(score) / float(len(score))))
