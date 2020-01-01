@@ -277,6 +277,7 @@ class CaptioningSolver(object):
 
         losses, accs = 0, 0
 
+        sample_captions = []
         for event_idx in range(event_features.size(1)):
             batch_size = batch_sizes[event_idx]
             e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features[:batch_size], event_features_proj[:batch_size], events_mask[:batch_size],
@@ -285,6 +286,7 @@ class CaptioningSolver(object):
 
             # feats_alphas = []
             loss, acc, count_mask = 0., 0., 0.
+            sample_caption = []
             for caption_idx in range(cap_vecs.size(2) - 1):
                 curr_cap_vecs = cap_vecs[:, event_idx, caption_idx]
                 captions_mask = captions_masks[:, event_idx, :]
@@ -292,7 +294,6 @@ class CaptioningSolver(object):
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
                                                                                          caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size],
                                                                                          c_hidden_states[:, :batch_size], c_cell_states[:, :batch_size], curr_cap_vecs[:batch_size])
-                print(logits.size())
 
                 next_cap_vecs = cap_vecs[:batch_size, event_idx, caption_idx + 1]
                 loss += self.word_criterion(logits, next_cap_vecs)
@@ -302,6 +303,8 @@ class CaptioningSolver(object):
                 count_mask += torch.sum(mask_next_cap_vecs).item()
                 # feats_alphas.append(feats_alpha)
 
+                sample_caption.append(torch.argmax(logits[0]).item())
+
             # if self.alpha_c > 0:
             #    sum_loc_alphas = torch.sum(nn.utils.rnn.pad_sequence(feats_alphas), 1)
             #    feats_alphas_reg = self.alpha_c * self.alpha_criterion(sum_loc_alphas, (seq_lens / self.model.L).repeat(1, self.model.L))
@@ -309,12 +312,16 @@ class CaptioningSolver(object):
 
             loss /= caption_features.size(0)
             losses += loss
-
             accs += acc / count_mask
+
+            sample_captions.append(sample_caption)
 
         losses.backward()
         self.optimizer.step()
         accs = accs / event_features.size(1)
+
+        print(sample_captions)
+        print(sentences[0])
 
         return loss.item(), accs
 
