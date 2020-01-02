@@ -50,15 +50,17 @@ class EventRNN(nn.Module):
         self.device = cfg.DEVICE
 
     def get_initial_lstm(self, feats_proj):
-        print(feats_proj.size())
         feats_mean = torch.mean(feats_proj, 1)
-        print(feats_mean.size())
         h = torch.tanh(self.hidden_state_init_layer(feats_mean)).unsqueeze(0)
         c = torch.tanh(self.cell_state_init_layer(feats_mean)).unsqueeze(0)
-        if torch.sum(torch.isnan(h)) > 0:
+        if torch.sum(torch.isnan(feats_proj)) > 0:
             print('-' * 80)
             print('error in event rnn get_initial_lstm.')
             print(feats_proj)
+            print('-' * 80)
+        if torch.sum(torch.isnan(feats_mean)) > 0:
+            print('-' * 80)
+            print('error in event rnn get_initial_lstm.')
             print(feats_mean)
             print('-' * 80)
         return c, h
