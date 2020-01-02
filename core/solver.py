@@ -100,8 +100,7 @@ class CaptioningSolver(object):
         Required Arguments:
             - model: Show Attend and Tell caption generating model
         Optional Arguments:
-            - n_epochs: The number of epochs to run for training.
-            - batch_size: Mini batch size.
+            - n_epochs: The number of epochs to run for training. - batch_size: Mini batch size.
             - update_rule: A string giving the name of an update rule
             - learning_rate: Learning rate; default value is 0.01.
             - snapshot_steps: Integer; training losses will be printed every snapshot_steps iterations.
@@ -265,6 +264,12 @@ class CaptioningSolver(object):
         captions_masks = captions_masks.to(device=self.device)
         batch_sizes = batch_sizes.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
+        if torch.sum(torch.isnan(caption_features)) > 0:
+            print('-' * 80)
+            print('error in solver caption_features.')
+            print(torch.sum(torch.isnan(caption_features)).item())
+            print(caption_features)
+            print('-' * 80)
         if torch.sum(torch.isnan(event_features)) > 0:
             print('-' * 80)
             print('error in solver event_features.')
