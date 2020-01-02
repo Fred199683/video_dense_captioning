@@ -106,6 +106,15 @@ class EventRNN(nn.Module):
         if torch.sum(torch.isnan(next_hidden_states)) > 0:
             print('-' * 80)
             print('error in event rnn.')
+            if torch.sum(torch.isnan(next_input)) > 0:
+                print('\terror in next_input')
+                print(next_input)
+            if torch.sum(torch.isnan(hidden_states)) > 0:
+                print('\terror in hidden_states')
+                print(hidden_states)
+            if torch.sum(torch.isnan(cell_states)) > 0:
+                print('\terror in cell_states')
+                print(hidden_states)
             print('-' * 80)
             sys.exit()
 
