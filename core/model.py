@@ -63,20 +63,7 @@ class EventRNN(nn.Module):
         return features_proj
 
     def normalize(self, x):
-        norm = self.features_norm_layer(x)
-        if torch.sum(torch.isnan(norm)) > 0:
-            print('-' * 80)
-            print('error in event rnn normalize.')
-            print(torch.sum(torch.isnan(x)).item())
-            print(x)
-            print('-' * 80)
-        if torch.sum(torch.isnan(norm)) > 0:
-            print('-' * 80)
-            print('error in event rnn normalize.')
-            print(torch.sum(torch.isnan(norm)).item())
-            print(norm)
-            print('-' * 80)
-        return norm
+        return self.features_norm_layer(x)
 
     def _attention_layer(self, features, features_proj, mask, hidden_states, attention_layer):
         h_att = F.relu(features_proj + self.hidden_to_attention_layer(hidden_states[-1]).unsqueeze(1))    # (N, L, D)

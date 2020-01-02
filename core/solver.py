@@ -265,6 +265,12 @@ class CaptioningSolver(object):
         captions_masks = captions_masks.to(device=self.device)
         batch_sizes = batch_sizes.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
+        if torch.sum(torch.isnan(event_features)) > 0:
+            print('-' * 80)
+            print('error in solver event_features.')
+            print(torch.sum(torch.isnan(event_features)).item())
+            print(event_features)
+            print('-' * 80)
 
         caption_features = self.caption_rnn.normalize(caption_features)
         caption_features_proj = self.caption_rnn.project_features(caption_features)
