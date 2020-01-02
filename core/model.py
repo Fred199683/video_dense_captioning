@@ -60,22 +60,23 @@ class EventRNN(nn.Module):
         features_flat = features.view(-1, dim)
         features_proj = F.relu(self.feats_proj_layer(features_flat))
         features_proj = features_proj.view(batch, loc, -1)
-        if torch.sum(torch.isnan(features)) > 0:
-            print('-' * 80)
-            print('error in event rnn project_features.')
-            print(torch.sum(torch.isnan(features)).item())
-            print(features)
-            print('-' * 80)
-        if torch.sum(torch.isnan(features_proj)) > 0:
-            print('-' * 80)
-            print('error in event rnn project_features.')
-            print(torch.sum(torch.isnan(features_proj)).item())
-            print(features_proj)
-            print('-' * 80)
         return features_proj
 
     def normalize(self, x):
-        return self.features_norm_layer(x)
+        norm = self.features_norm_layer(x)
+        if torch.sum(torch.isnan(norm)) > 0:
+            print('-' * 80)
+            print('error in event rnn normalize.')
+            print(torch.sum(torch.isnan(x)).item())
+            print(x)
+            print('-' * 80)
+        if torch.sum(torch.isnan(norm)) > 0:
+            print('-' * 80)
+            print('error in event rnn normalize.')
+            print(torch.sum(torch.isnan(norm)).item())
+            print(norm)
+            print('-' * 80)
+        return norm
 
     def _attention_layer(self, features, features_proj, mask, hidden_states, attention_layer):
         h_att = F.relu(features_proj + self.hidden_to_attention_layer(hidden_states[-1]).unsqueeze(1))    # (N, L, D)
