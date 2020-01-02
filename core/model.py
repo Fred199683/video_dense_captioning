@@ -19,21 +19,9 @@ import sys
 
 
 def mask_softmax(preds, mask, dim=-1):
-    if torch.sum(torch.isnan(preds)) > 0:
-        print('-' * 80)
-        print('error before mask softmax')
-        print(preds)
-        print('-' * 80)
-        sys.exit()
     preds = preds.masked_fill(~mask, float('-inf'))
     preds = F.softmax(preds, dim=dim)
     preds = preds.masked_fill(~mask, 0)
-    if torch.sum(torch.isnan(preds)) > 0:
-        print('-' * 80)
-        print('error after mask softmax')
-        print(preds)
-        print('-' * 80)
-        sys.exit()
     return preds
 
 
@@ -81,6 +69,12 @@ class EventRNN(nn.Module):
         h_att = F.relu(features_proj + self.hidden_to_attention_layer(hidden_states[-1]).unsqueeze(1))    # (N, L, D)
         loc, dim = features_proj.size()[1:]
         out_att = attention_layer(h_att.view(-1, dim)).view(-1, loc)   # (N, L)
+        if torch.sum(torch.isnan(out_att)) > 0:
+            print('-' * 80)
+            print('error in event rnn.')
+            print(out_att)
+            print('-' * 80)
+            sys.exit()
         alpha = mask_softmax(out_att, mask)
         context = torch.sum(features * alpha.unsqueeze(2), 1)   # (N, D)
         return context, alpha
@@ -176,6 +170,12 @@ class CaptionRNN(nn.Module):
         h_att = F.relu(features_proj + self.hidden_to_attention_layer(hidden_states[-1]).unsqueeze(1))    # (N, L, D)
         loc, dim = features_proj.size()[1:]
         out_att = self.attention_layer(h_att.view(-1, dim)).view(-1, loc)   # (N, L)
+        if torch.sum(torch.isnan(out_att)) > 0:
+            print('-' * 80)
+            print('error in caption rnn.')
+            print(out_att)
+            print('-' * 80)
+            sys.exit()
         alpha = mask_softmax(out_att, mask)
         context = torch.sum(features * alpha.unsqueeze(2), 1)   # (N, D)
         return context, alpha
