@@ -56,12 +56,12 @@ class EventRNN(nn.Module):
         if torch.sum(torch.isnan(feats_proj)) > 0:
             print('-' * 80)
             print('error in event rnn get_initial_lstm.')
-            print(feats_proj)
+            print(torch.sum(torch.isnan(feats_proj)))
             print('-' * 80)
         if torch.sum(torch.isnan(feats_mean)) > 0:
             print('-' * 80)
             print('error in event rnn get_initial_lstm.')
-            print(feats_mean)
+            print(torch.sum(torch.isnan(feats_mean)))
             print('-' * 80)
         return c, h
 
