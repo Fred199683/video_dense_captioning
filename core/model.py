@@ -19,12 +19,20 @@ import sys
 
 
 def mask_softmax(preds, mask, dim=-1):
-    masked_preds = preds.masked_fill(~mask, float('-inf'))
-    preds = F.softmax(masked_preds, dim=dim)
+    if torch.sum(torch.isnan(preds)) > 0:
+        print('-' * 80)
+        print('error before mask softmax')
+        print(preds)
+        print('-' * 80)
+        sys.exit()
+    preds = preds.masked_fill(~mask, float('-inf'))
+    preds = F.softmax(preds, dim=dim)
     preds = preds.masked_fill(~mask, 0)
     if torch.sum(torch.isnan(preds)) > 0:
+        print('-' * 80)
+        print('error after mask softmax')
         print(preds)
-        print(masked_preds)
+        print('-' * 80)
         sys.exit()
     return preds
 
