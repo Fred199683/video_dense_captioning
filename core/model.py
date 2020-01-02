@@ -69,15 +69,6 @@ class EventRNN(nn.Module):
         h_att = F.relu(features_proj + self.hidden_to_attention_layer(hidden_states[-1]).unsqueeze(1))    # (N, L, D)
         loc, dim = features_proj.size()[1:]
         out_att = attention_layer(h_att.view(-1, dim)).view(-1, loc)   # (N, L)
-        if torch.sum(torch.isnan(out_att)) > 0:
-            print('-' * 80)
-            print('error in event rnn.')
-            print(out_att)
-            print(features_proj)
-            print(hidden_states)
-            print(h_att)
-            print('-' * 80)
-            sys.exit()
         alpha = mask_softmax(out_att, mask)
         context = torch.sum(features * alpha.unsqueeze(2), 1)   # (N, D)
         return context, alpha
@@ -111,6 +102,12 @@ class EventRNN(nn.Module):
         next_input = torch.cat((caption_hidden_states.squeeze(0), feats_context, feature), 1).unsqueeze(0)
 
         output, (next_hidden_states, next_cell_states) = self.lstm_cell(next_input, (hidden_states, cell_states))
+
+        if torch.sum(torch.isnan(next_hidden_states)) > 0:
+            print('-' * 80)
+            print('error in event rnn.')
+            print('-' * 80)
+            sys.exit()
 
         return next_hidden_states, next_cell_states
 
@@ -173,15 +170,6 @@ class CaptionRNN(nn.Module):
         h_att = F.relu(features_proj + self.hidden_to_attention_layer(hidden_states[-1]).unsqueeze(1))    # (N, L, D)
         loc, dim = features_proj.size()[1:]
         out_att = self.attention_layer(h_att.view(-1, dim)).view(-1, loc)   # (N, L)
-        if torch.sum(torch.isnan(out_att)) > 0:
-            print('-' * 80)
-            print('error in caption rnn.')
-            print(out_att)
-            print(features_proj)
-            print(hidden_states)
-            print(h_att)
-            print('-' * 80)
-            sys.exit()
         alpha = mask_softmax(out_att, mask)
         context = torch.sum(features * alpha.unsqueeze(2), 1)   # (N, D)
         return context, alpha
