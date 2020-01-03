@@ -42,13 +42,13 @@ def train_collate(batch):
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
             mean_feat = torch.mean(torch.tensor(features).double(), axis=0)
-            print(mean_feat.size())
             if torch.sum(torch.isnan(torch.tensor(features))) > 0:
                 print('-' * 80)
                 print('error in collate features.')
                 print(torch.sum(torch.isnan(torch.tensor(features))).item())
                 print('-' * 80)
             if torch.sum(torch.isnan(mean_feat)) > 0:
+                print(torch.sum(torch.tensor(features).double()))
                 print('-' * 80)
                 print('error in collate mean.')
                 print(torch.sum(torch.isnan(mean_feat)).item())
