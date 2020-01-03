@@ -41,7 +41,7 @@ def train_collate(batch):
     padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim).double()
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
-            mean_feat = torch.mean(torch.tensor(features), axis=0)
+            mean_feat = torch.mean(torch.tensor(features).double(), axis=0)
             if torch.sum(torch.isnan(torch.tensor(features))) > 0:
                 print('-' * 80)
                 print('error in collate features.')
@@ -87,7 +87,7 @@ def infer_collate(batch):
     padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim).double()
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
-            padded_batch_event_features[i][j] = torch.mean(torch.tensor(features), axis=0)
+            padded_batch_event_features[i][j] = torch.mean(torch.tensor(features).double(), axis=0)
 
     event_lens = torch.tensor([[len(features) for features in event_features] + [0] * (max_event_num - len(event_features)) for event_features in batch_features])
     max_event_len = torch.max(event_lens).item()
