@@ -48,9 +48,10 @@ def train_collate(batch):
                 print(torch.sum(torch.isnan(torch.tensor(features))).item())
                 print('-' * 80)
             if torch.sum(torch.isnan(mean_feat)) > 0:
-                print(torch.sum(torch.tensor(features).double()))
                 print('-' * 80)
                 print('error in collate mean.')
+                print(features.size())
+                print(torch.sum(torch.tensor(features).double()))
                 print(torch.sum(torch.isnan(mean_feat)).item())
                 print('-' * 80)
             padded_batch_event_features[i][j] = mean_feat
