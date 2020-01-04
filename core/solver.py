@@ -1,4 +1,3 @@
-from collections import defaultdict
 import torch
 from torch import optim, nn
 from torch.nn import functional as F
@@ -38,16 +37,16 @@ def train_collate(batch):
         for j, cap_vecs in enumerate(event_cap_vecs):
             padded_batch_cap_vecs[i][j] = torch.tensor(cap_vecs).long()
 
-    padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim).double()
+    padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim)
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
-            mean_feat = torch.mean(torch.tensor(features).double(), axis=0)
+            mean_feat = torch.mean(torch.tensor(features), axis=0)
             padded_batch_event_features[i][j] = mean_feat
 
     event_lens = torch.tensor([[len(features) for features in event_features] + [0] * (max_event_num - len(event_features)) for event_features in batch_features])
     max_event_len = torch.max(event_lens).item()
 
-    padded_batch_caption_features = torch.zeros(batch_size, max_event_num, max_event_len, feature_dim).double()
+    padded_batch_caption_features = torch.zeros(batch_size, max_event_num, max_event_len, feature_dim)
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
             padded_batch_caption_features[i][j][:len(features)] = torch.tensor(features)
@@ -74,15 +73,15 @@ def infer_collate(batch):
     event_nums = torch.tensor([len(event_features) for event_features in batch_features])
     max_event_num = torch.max(event_nums).item()
 
-    padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim).double()
+    padded_batch_event_features = torch.zeros(batch_size, max_event_num, feature_dim)
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
-            padded_batch_event_features[i][j] = torch.mean(torch.tensor(features).double(), axis=0)
+            padded_batch_event_features[i][j] = torch.mean(torch.tensor(features), axis=0)
 
     event_lens = torch.tensor([[len(features) for features in event_features] + [0] * (max_event_num - len(event_features)) for event_features in batch_features])
     max_event_len = torch.max(event_lens).item()
 
-    padded_batch_caption_features = torch.zeros(batch_size, max_event_num, max_event_len, feature_dim).double()
+    padded_batch_caption_features = torch.zeros(batch_size, max_event_num, max_event_len, feature_dim)
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
             padded_batch_caption_features[i][j][:len(features)] = torch.tensor(features)
