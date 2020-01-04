@@ -136,9 +136,7 @@ def main():
                     begin_pivot = round(begin_timestamp / video_duration * feature_size / scale_factor)
                     end_pivot = round(end_timestamp / video_duration * feature_size / scale_factor)
 
-                    if begin_pivot != end_pivot:
-                        if end_pivot <= begin_pivot:
-                            print('warning: end is lower than begin.')
+                    if begin_pivot > end_pivot:
                         event_feature = video_feature[begin_pivot: end_pivot, :]
                         np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
                         new_event_timestamps.append(event_timestamps[i])
@@ -146,8 +144,8 @@ def main():
 
                     else:
                         warning_count += 1
-                        if max_len < end_timestamp - begin_timestamp:
-                            max_len = end_timestamp - begin_timestamp
+                        if max_len < abs(end_timestamp - begin_timestamp):
+                            max_len = abs(end_timestamp - begin_timestamp)
                     total_count += 1
 
                 if phase == 'train':
