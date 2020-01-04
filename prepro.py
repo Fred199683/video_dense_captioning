@@ -137,6 +137,8 @@ def main():
                     end_pivot = round(end_timestamp / video_duration * feature_size / scale_factor)
 
                     if begin_pivot != end_pivot:
+                        if end_pivot <= begin_pivot:
+                            print('warning: end is lower than begin.')
                         event_feature = video_feature[begin_pivot: end_pivot, :]
                         np.save(os.path.join(video_feature_path, '%d.npy' % i), event_feature)
                         new_event_timestamps.append(event_timestamps[i])
