@@ -326,7 +326,9 @@ class CaptioningSolver(object):
         return loss.item(), accs
 
     def testing_start_epoch_handler(self, engine):
-        engine.state.annotations = {}
+        engine.state.annotations = {'version': 'VERSION 1.0',
+                                    'results': {},
+                                    'extrernal_data': {}}
 
     def testing_end_epoch_handler(self, engine, is_test):
         save_json(engine.state.annotations, self.results_path)
@@ -374,7 +376,7 @@ class CaptioningSolver(object):
                 predictions[video_id]['sentences'].append(caption)
                 predictions[video_id]['timestamps'].append(timestamp)
 
-        engine.state.annotations.update(predictions)
+        engine.state.annotations['results'].update(predictions)
 
     def train(self):
         self.train_engine.run(self.train_loader, max_epochs=self.n_epochs)
