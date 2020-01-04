@@ -6,6 +6,7 @@ from ignite.engine import Engine, Events
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from tensorboardX import SummaryWriter
 
+from collections import defaultdict
 import numpy as np
 import os
 
