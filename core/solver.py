@@ -328,7 +328,7 @@ class CaptioningSolver(object):
     def testing_start_epoch_handler(self, engine):
         engine.state.annotations = {'version': 'VERSION 1.0',
                                     'results': {},
-                                    'extrernal_data': {}}
+                                    'external_data': {}}
 
     def testing_end_epoch_handler(self, engine, is_test):
         save_json(engine.state.annotations, self.results_path)
