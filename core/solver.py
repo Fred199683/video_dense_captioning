@@ -360,7 +360,7 @@ class CaptioningSolver(object):
         e_hidden_states, e_cell_states = self.event_rnn.get_initial_lstm(event_features_proj)
         c_hidden_states = self.caption_rnn.zero_hidden_states(batch_size=event_features.size(0))
 
-        predictions = defaultdict(lambda: {'timestamps': [], 'sentences': []})
+        predictions = defaultdict(list)
         for event_idx in range(event_features.size(1)):
             batch_size = batch_sizes[event_idx]
             captions_mask = captions_masks[:, event_idx, :]
@@ -373,8 +373,7 @@ class CaptioningSolver(object):
 
             captions = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
             for video_id, timestamp, caption in zip(video_ids, timestamps, captions):
-                predictions[video_id]['sentences'].append(caption)
-                predictions[video_id]['timestamps'].append(timestamp)
+                predictions[video_id].append({'sentences': caption, 'timestamp': timestamp})
 
         engine.state.annotations['results'].update(predictions)
 
