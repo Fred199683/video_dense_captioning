@@ -42,18 +42,6 @@ def train_collate(batch):
     for i, event_features in enumerate(batch_features):
         for j, features in enumerate(event_features):
             mean_feat = torch.mean(torch.tensor(features).double(), axis=0)
-            if torch.sum(torch.isnan(torch.tensor(features))) > 0:
-                print('-' * 80)
-                print('error in collate features.')
-                print(torch.sum(torch.isnan(torch.tensor(features))).item())
-                print('-' * 80)
-            if torch.sum(torch.isnan(mean_feat)) > 0:
-                print('-' * 80)
-                print('error in collate mean.')
-                print(torch.tensor(features).size())
-                print(torch.sum(torch.tensor(features).double()))
-                print(torch.sum(torch.isnan(mean_feat)).item())
-                print('-' * 80)
             padded_batch_event_features[i][j] = mean_feat
 
     event_lens = torch.tensor([[len(features) for features in event_features] + [0] * (max_event_num - len(event_features)) for event_features in batch_features])
@@ -277,18 +265,6 @@ class CaptioningSolver(object):
         captions_masks = captions_masks.to(device=self.device)
         batch_sizes = batch_sizes.to(device=self.device)
         cap_vecs = cap_vecs.to(device=self.device)
-        if torch.sum(torch.isnan(caption_features)) > 0:
-            print('-' * 80)
-            print('error in solver caption_features.')
-            print(torch.sum(torch.isnan(caption_features)).item())
-            print(caption_features)
-            print('-' * 80)
-        if torch.sum(torch.isnan(event_features)) > 0:
-            print('-' * 80)
-            print('error in solver event_features.')
-            print(torch.sum(torch.isnan(event_features)).item())
-            print(event_features)
-            print('-' * 80)
 
         caption_features = self.caption_rnn.normalize(caption_features)
         caption_features_proj = self.caption_rnn.project_features(caption_features)
