@@ -371,9 +371,9 @@ class CaptioningSolver(object):
 
             cap_vecs = self.beam_decoder.decode(caption_features[:batch_size, event_idx], caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size], c_hidden_states, c_cell_states)
 
-            captions = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
-            for video_id, timestamp, caption in zip(video_ids, timestamps, captions):
-                predictions[video_id].append({'sentences': caption, 'timestamp': timestamp})
+            sentences = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
+            for video_id, event_timestamps, sentence in zip(video_ids, timestamps, sentences):
+                predictions[video_id].append({'sentence': sentence, 'timestamp': event_timestamps[event_idx]})
 
         engine.state.annotations['results'].update(predictions)
 
