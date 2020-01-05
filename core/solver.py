@@ -338,7 +338,10 @@ class CaptioningSolver(object):
             evaluate(candidate_path=self.results_path, get_scores=True)
             caption_scores = load_json(self.eval_path)
             for metric, scores in caption_scores.items():
-                print(metric, ': ', sum(scores) / float(len(scores)))
+                score = sum(scores) / float(len(scores))
+                print(metric, ': ', score)
+                caption_scores[metric] = score
+
             print('-' * 40)
             engine.state.scores = caption_scores
 
