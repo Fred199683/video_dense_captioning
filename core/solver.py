@@ -336,8 +336,7 @@ class CaptioningSolver(object):
         if not is_test:
             print('-' * 40)
             evaluate(candidate_path=self.results_path, get_scores=True)
-            with open(self.eval_path, 'r') as f:
-                caption_scores = load_json(f)
+            caption_scores = load_json(self.eval_path)
             for metric, scores in caption_scores.items():
                 print(metric, ': ', sum(scores) / float(len(scores)))
             print('-' * 40)
