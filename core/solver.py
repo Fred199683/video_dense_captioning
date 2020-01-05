@@ -10,7 +10,7 @@ from collections import defaultdict
 import numpy as np
 import os
 
-from .utils import save_json, evaluate, decode_captions
+from .utils import save_json, load_json, evaluate, decode_captions
 from .dataset import CocoCaptionDataset
 from .beam_decoder import BeamSearchDecoder
 
@@ -334,9 +334,11 @@ class CaptioningSolver(object):
         save_json(engine.state.annotations, self.results_path)
         if not is_test:
             print('-' * 40)
-            caption_scores = evaluate(candidate_path=self.results_path, get_scores=True)
-            for metric, score in caption_scores.items():
-                print(metric, ': ', score)
+            evaluate(candidate_path=self.results_path, get_scores=True)
+            with open(self.eval_path, 'r') as f:
+                caption_scores = load_json(f)
+            for metric, scores in caption_scores.items():
+                print(metric, ': ', sum(scores) / float(len(scores)))
             print('-' * 40)
             engine.state.scores = caption_scores
 
