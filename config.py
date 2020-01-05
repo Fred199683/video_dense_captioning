@@ -50,6 +50,7 @@ config.SOLVER.INFER.N_TIME_STEPS = 30           # number of time steps in infere
 config.SOLVER.INFER.BEAM_SIZE = 3               # beam size being used while inference
 config.SOLVER.INFER.LEN_NORM = 0.4              # length normalization being used while inference
 config.SOLVER.INFER.RESULT_PATH = 'results/results.json'  # path to save results after inference
+config.SOLVER.INFER.EVAL_PATH = 'results/eval.json'  # path to save eval results after evaluation
 
 config.DEVICE = 'cuda:0'  # decide which gpu being used
 

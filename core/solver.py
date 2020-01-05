@@ -125,6 +125,7 @@ class CaptioningSolver(object):
         self.checkpoint_dir = cfg.SOLVER.TRAIN.CKPT_DIR
         self.checkpoint = cfg.SOLVER.TRAIN.CKPT
         self.results_path = cfg.SOLVER.INFER.RESULT_PATH
+        self.eval_path = sfg.SOLVER.INFER.EVAL_PATH
         self.capture_scores = kwargs.pop('capture_scores', ['bleu_1', 'bleu_4', 'meteor', 'cider'])
 
         self.device = cfg.DEVICE
