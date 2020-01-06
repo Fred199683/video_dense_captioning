@@ -227,14 +227,14 @@ class CaptioningSolver(object):
         self.writer.add_scalar('Loss', loss, iteration)
         self.writer.add_scalar('Accuracy', acc, iteration)
 
-        if iteration % self.eval_every == 0:
-            caption_scores = self.test(self.val_loader, is_validation=True)
-            for metric, score in caption_scores.items():
-                self.writer.add_scalar(metric, score, iteration)
-            for metric, score in engine.state.best_scores.items():
-                if score < caption_scores[metric]:
-                    engine.state.best_scores[metric] = caption_scores[metric]
-                    self._save(epoch, iteration, loss, engine.state.best_scores, prefix='best_' + metric)
+        # if iteration % self.eval_every == 0:
+        #     caption_scores = self.test(self.val_loader, is_validation=True)
+        #     for metric, score in caption_scores.items():
+        #         self.writer.add_scalar(metric, score, iteration)
+        #     for metric, score in engine.state.best_scores.items():
+        #         if score < caption_scores[metric]:
+        #             engine.state.best_scores[metric] = caption_scores[metric]
+        #             self._save(epoch, iteration, loss, engine.state.best_scores, prefix='best_' + metric)
 
     def training_end_epoch_handler(self, engine):
         iteration = engine.state.iteration
@@ -253,6 +253,7 @@ class CaptioningSolver(object):
         for metric, score in engine.state.best_scores.items():
             if score < caption_scores[metric]:
                 engine.state.best_scores[metric] = caption_scores[metric]
+                self._save(epoch, iteration, loss, engine.state.best_scores, prefix='best_' + metric)
 
         self._save(epoch, iteration, engine.state.output[0], engine.state.best_scores)
 
