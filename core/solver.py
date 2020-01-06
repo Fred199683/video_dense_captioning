@@ -1,4 +1,3 @@
-import torch
 from torch import optim, nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
@@ -183,7 +182,8 @@ class CaptioningSolver(object):
 
         model_dict = {'epoch': epoch,
                       'iteration': iteration,
-                      'model_state_dict': self.model.state_dict(),
+                      'event_state_dict': self.event_rnn.state_dict(),
+                      'caption_state_dict': self.caption_rnn.state_dict(),
                       'optimizer_state_dict': self.optimizer.state_dict(),
                       'loss': loss}
         for metric, score in best_scores.items():
@@ -196,7 +196,8 @@ class CaptioningSolver(object):
 
     def _load(self, model_path, is_test=False):
         checkpoint = torch.load(model_path)
-        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.event_rnn.load_state_dict(checkpoint['event_state_dict'])
+        self.caption_rnn.load_state_dict(checkpoint['caption_state_dict'])
         if not is_test:
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         self.start_iter = checkpoint['iteration']
