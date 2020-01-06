@@ -77,7 +77,7 @@ def build_caption_vector(captions_data, word_to_idx, caption_len=30):
             cap_vec.append(word_to_idx['<END>'])
             words.append('<END>')
 
-            while len(cap_vec) < vocab_size + 2:
+            while len(cap_vec) < caption_len + 2:
                 cap_vec.append(word_to_idx['<NULL>'])
                 words.append('<NULL>')
 
@@ -163,7 +163,7 @@ def main():
             print('There are %d empty videos being removed.' % len(empty_videos))
 
         if phase == 'train':
-            captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx, cfg.DATASET.SEQUENCE_LENGTH)
+            captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx, caption_len=cfg.DATASET.SEQUENCE_LENGTH)
             save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
 
 
