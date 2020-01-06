@@ -34,7 +34,7 @@ class EventRNN(nn.Module):
         self.H = cfg.MODEL.ERNN.D_HIDDEN
 
         # Trainable parameters :
-        self.lstm_cell = nn.LSTM(2 * self.D + self.H, self.H, dropout=0.5)
+        self.lstm_cell = nn.LSTM(self.D + self.H, self.H, dropout=0.5)
         self.hidden_state_init_layer = nn.Linear(self.D, self.H)
         self.cell_state_init_layer = nn.Linear(self.D, self.H)
         self.feats_proj_layer = nn.Linear(self.D, self.D)
