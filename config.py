@@ -38,7 +38,7 @@ config.MODEL.CRNN.D_HIDDEN = 1024         # RNN hidden size
 
 config.SOLVER.TRAIN.OPTIM = 'adam'              # optimizer
 config.SOLVER.TRAIN.LR = 0.001                  # learning rate
-config.SOLVER.TRAIN.N_EPOCHS = 10               # number of epochs
+config.SOLVER.TRAIN.N_EPOCHS = 50               # number of epochs
 config.SOLVER.TRAIN.BATCH_SIZE = 16             # batch size being used while training
 config.SOLVER.TRAIN.EVAL_STEPS = 500            # steps taken before evaluation during training
 config.SOLVER.TRAIN.CKPT = None                 # input path to a checkpoint if you want to resume training from it
