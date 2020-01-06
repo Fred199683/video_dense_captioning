@@ -59,7 +59,7 @@ def build_vocab(captions_data, threshold=1, vocab_size=None):
     return word_to_idx
 
 
-def build_caption_vector(captions_data, word_to_idx, vocab_size=30):
+def build_caption_vector(captions_data, word_to_idx, caption_len=30):
     for video_id, annotation in captions_data.items():
         captions_data[video_id]['vectors'] = []
         for i, sentence in enumerate(annotation['sentences']):
@@ -163,7 +163,7 @@ def main():
             print('There are %d empty videos being removed.' % len(empty_videos))
 
         if phase == 'train':
-            captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx)
+            captions_data = build_caption_vector(captions_data, word_to_idx=word_to_idx, cfg.DATASET.SEQUENCE_LENGTH)
             save_json(captions_data, cfg.DATASET.TRAIN.ENC_CAPTION_PATH)
 
 
