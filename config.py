@@ -52,7 +52,7 @@ config.SOLVER.INFER.LEN_NORM = 0.4              # length normalization being use
 config.SOLVER.INFER.RESULT_PATH = 'results/results.json'  # path to save results after inference
 config.SOLVER.INFER.EVAL_PATH = 'results/eval.json'  # path to save eval results after evaluation
 
-config.SOLVER.CAPTURED_METRICS = ['bleu_1', 'meteor', 'cider']
+config.SOLVER.CAPTURED_METRICS = ['meteor', 'cider']
 
 config.DEVICE = 'cuda:0'  # decide which gpu being used
 
