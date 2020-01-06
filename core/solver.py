@@ -126,7 +126,7 @@ class CaptioningSolver(object):
         self.checkpoint = cfg.SOLVER.TRAIN.CKPT
         self.results_path = cfg.SOLVER.INFER.RESULT_PATH
         self.eval_path = cfg.SOLVER.INFER.EVAL_PATH
-        self.capture_scores = kwargs.pop('capture_scores', ['bleu_1', 'bleu_4', 'meteor', 'cider'])
+        self.capture_scores = cfg.SOLVER.CAPTURED_METRICS
 
         self.device = cfg.DEVICE
 
@@ -340,7 +340,7 @@ class CaptioningSolver(object):
             for metric, scores in caption_scores.items():
                 score = sum(scores) / float(len(scores))
                 print(metric, ': ', score)
-                caption_scores[metric] = score
+                caption_scores[metric.lower()] = score
 
             print('-' * 40)
             engine.state.scores = caption_scores
