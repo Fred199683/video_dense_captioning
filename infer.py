@@ -7,7 +7,7 @@ from config import config as cfg
 
 def main():
     cfg.TRAIN.ENABLED = False
-    cfg.CHECKPOINT = 'checkpoint/model_best_meteor.pth'
+    cfg.SOLVER.CHECKPOINT = 'checkpoint/model_best_meteor.pth'
 
     batch_size = cfg.SOLVER.INFER.BATCH_SIZE
     caption_file = cfg.DATASET.VAL.CAPTION_PATH
