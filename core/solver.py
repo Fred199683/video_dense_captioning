@@ -123,7 +123,7 @@ class CaptioningSolver(object):
         self.eval_every = cfg.SOLVER.TRAIN.EVAL_STEPS
         self.log_path = cfg.SOLVER.TRAIN.LOG_DIR
         self.checkpoint_dir = cfg.SOLVER.TRAIN.CKPT_DIR
-        self.checkpoint = cfg.SOLVER.TRAIN.CKPT
+        self.checkpoint = cfg.SOLVER.CHECKPOINT
         self.results_path = cfg.SOLVER.INFER.RESULT_PATH
         self.eval_path = cfg.SOLVER.INFER.EVAL_PATH
         self.capture_scores = cfg.SOLVER.CAPTURED_METRICS
@@ -338,7 +338,7 @@ class CaptioningSolver(object):
         save_json(engine.state.annotations, self.results_path)
         if not is_test:
             print('-' * 40)
-            evaluate(candidate_path=self.results_path, get_scores=True)
+            evaluate(candidate_path=self.results_path)
             raw_caption_scores = load_json(self.eval_path)
             caption_scores = {}
             for metric, scores in raw_caption_scores.items():

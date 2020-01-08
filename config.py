@@ -36,23 +36,23 @@ config.MODEL.CRNN.D_FEATURE = 500         # feature size
 config.MODEL.CRNN.D_EMBED = 300           # embedding size
 config.MODEL.CRNN.D_HIDDEN = 1024         # RNN hidden size
 
-config.SOLVER.TRAIN.OPTIM = 'adam'              # optimizer
-config.SOLVER.TRAIN.LR = 0.001                  # learning rate
-config.SOLVER.TRAIN.N_EPOCHS = 50               # number of epochs
-config.SOLVER.TRAIN.BATCH_SIZE = 16             # batch size being used while training
-config.SOLVER.TRAIN.EVAL_STEPS = 500            # steps taken before evaluation during training
-config.SOLVER.TRAIN.CKPT = None                 # input path to a checkpoint if you want to resume training from it
-config.SOLVER.TRAIN.CKPT_DIR = 'checkpoint/'    # path to dir saving checkpoints during training
-config.SOLVER.TRAIN.LOG_DIR = 'log/'            # path to logging dir
-config.SOLVER.TRAIN.ALPHA_C = 1.0               # param for training a constrain to alphas, make the attention spread over entire sequence (caption).
+config.SOLVER.TRAIN.OPTIM = 'adam'                          # optimizer
+config.SOLVER.TRAIN.LR = 0.001                              # learning rate
+config.SOLVER.TRAIN.N_EPOCHS = 50                           # number of epochs
+config.SOLVER.TRAIN.BATCH_SIZE = 16                         # batch size being used while training
+config.SOLVER.TRAIN.EVAL_STEPS = 500                        # steps taken before evaluation during training
+config.SOLVER.TRAIN.CKPT_DIR = 'checkpoint/'                # path to dir saving checkpoints during training
+config.SOLVER.TRAIN.LOG_DIR = 'log/'                        # path to logging dir
+config.SOLVER.TRAIN.ALPHA_C = 1.0                           # param for training a constrain to alphas, make the attention spread over entire sequence (caption).
+config.SOLVER.TRAIN.CAPTURED_METRICS = ['meteor', 'cider']  # metrics to be captured and logged while training
 
-config.SOLVER.INFER.N_TIME_STEPS = 50           # number of time steps in inference
-config.SOLVER.INFER.BEAM_SIZE = 3               # beam size being used while inference
-config.SOLVER.INFER.LEN_NORM = 0.4              # length normalization being used while inference
-config.SOLVER.INFER.RESULT_PATH = 'results/results.json'  # path to save results after inference
-config.SOLVER.INFER.EVAL_PATH = 'results/eval.json'  # path to save eval results after evaluation
+config.SOLVER.INFER.N_TIME_STEPS = 50                       # number of time steps in inference
+config.SOLVER.INFER.BEAM_SIZE = 3                           # beam size being used while inference
+config.SOLVER.INFER.LEN_NORM = 0.4                          # length normalization being used while inference
+config.SOLVER.INFER.RESULT_PATH = 'results/results.json'    # path to save results after inference
+config.SOLVER.INFER.EVAL_PATH = 'results/eval.json'         # path to save eval results after evaluation
 
-config.SOLVER.CAPTURED_METRICS = ['meteor', 'cider']
+config.SOLVER.CHECKPOINT = None     # input path to a checkpoint if you want to resume training from it
 
 config.DEVICE = 'cuda:0'  # decide which gpu being used
 
