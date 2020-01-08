@@ -46,7 +46,7 @@ config.SOLVER.TRAIN.CKPT_DIR = 'checkpoint/'    # path to dir saving checkpoints
 config.SOLVER.TRAIN.LOG_DIR = 'log/'            # path to logging dir
 config.SOLVER.TRAIN.ALPHA_C = 1.0               # param for training a constrain to alphas, make the attention spread over entire sequence (caption).
 
-config.SOLVER.INFER.N_TIME_STEPS = 70           # number of time steps in inference
+config.SOLVER.INFER.N_TIME_STEPS = 50           # number of time steps in inference
 config.SOLVER.INFER.BEAM_SIZE = 3               # beam size being used while inference
 config.SOLVER.INFER.LEN_NORM = 0.4              # length normalization being used while inference
 config.SOLVER.INFER.RESULT_PATH = 'results/results.json'  # path to save results after inference
