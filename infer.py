@@ -1,9 +1,8 @@
 from torch.utils.data import DataLoader
-from core.solver import CaptioningSolver
+from core.solver import CaptioningSolver, infer_collate
 from core.dataset import CocoCaptionDataset
 from core.utils import load_json
 from config import config as cfg
-from solver import infer_collate
 
 
 def main():
