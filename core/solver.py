@@ -390,9 +390,7 @@ class CaptioningSolver(object):
         self.train_engine.run(self.train_loader, max_epochs=self.n_epochs)
 
     def test(self, test_dataset=None, is_validation=False):
+        test_state = self.test_engine.run(test_dataset)
+
         if is_validation is True:
-            test_state = self.test_engine.run(test_dataset)
             return test_state.scores
-        else:
-            self.test_loader = DataLoader(test_dataset, batch_size=self.batch_size, num_workers=4)
-            self.test_engine.run(self.test_loader)
