@@ -19,7 +19,7 @@ def main():
     word_to_idx = load_json(cfg.DATASET.VOCAB_PATH)
 
     solver = CaptioningSolver(word_to_idx)
-    solver.test(test_data, is_validation)
+    solver.test(test_loader, is_validation)
 
 
 if __name__ == "__main__":
