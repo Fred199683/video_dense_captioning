@@ -126,11 +126,11 @@ class CaptioningSolver(object):
         self.checkpoint = cfg.SOLVER.CHECKPOINT
         self.results_path = cfg.SOLVER.INFER.RESULT_PATH
         self.eval_path = cfg.SOLVER.INFER.EVAL_PATH
-        self.capture_scores = cfg.SOLVER.CAPTURED_METRICS
+        self.capture_scores = cfg.SOLVER.TRAIN.CAPTURED_METRICS
 
         self.device = cfg.DEVICE
 
-        self.is_test = cfg.TEST.ENABLED and not (cfg.TRAIN.ENABLED or cfg.VAL.ENABLED)
+        self.is_train = cfg.TRAIN.ENABLED and cfg.VAL.ENABLED
 
         self.event_rnn = EventRNN(cfg).to(self.device)
         self.caption_rnn = CaptionRNN(cfg, len(word_to_idx)).to(self.device)
@@ -138,12 +138,12 @@ class CaptioningSolver(object):
         self.beam_decoder = BeamSearchDecoder(self.caption_rnn, len(self.idx_to_word), self._start, self._end, cfg)
 
         if self.checkpoint is not None:
-            self._load(self.checkpoint, is_test=self.is_test)
+            self._load(self.checkpoint, is_train=self.is_train)
         else:
             self.start_iter = 0
             self.init_best_scores = {score_name: 0. for score_name in self.capture_scores}
 
-        if not self.is_test:
+        if self.is_train:
             self.train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4, collate_fn=train_collate)
             self.val_loader = DataLoader(val_dataset, batch_size=self.batch_size, num_workers=4, collate_fn=infer_collate)
 
@@ -173,7 +173,7 @@ class CaptioningSolver(object):
         self.test_engine = Engine(self._test)
 
         self.test_engine.add_event_handler(Events.EPOCH_STARTED, self.testing_start_epoch_handler)
-        self.test_engine.add_event_handler(Events.EPOCH_COMPLETED, self.testing_end_epoch_handler, self.is_test)
+        self.test_engine.add_event_handler(Events.EPOCH_COMPLETED, self.testing_end_epoch_handler, self.is_train)
 
         test_pbar = ProgressBar()
         test_pbar.attach(self.test_engine)
@@ -195,11 +195,11 @@ class CaptioningSolver(object):
         print('-' * 40)
         torch.save(model_dict, os.path.join(self.checkpoint_dir, model_name))
 
-    def _load(self, model_path, is_test=False):
+    def _load(self, model_path, is_train):
         checkpoint = torch.load(model_path)
         self.event_rnn.load_state_dict(checkpoint['event_state_dict'])
         self.caption_rnn.load_state_dict(checkpoint['caption_state_dict'])
-        if not is_test:
+        if is_train:
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         self.start_iter = checkpoint['iteration']
         self.init_best_scores = {score_name: checkpoint[score_name] for score_name in self.capture_scores}
@@ -334,9 +334,9 @@ class CaptioningSolver(object):
                                     'results': {},
                                     'external_data': {}}
 
-    def testing_end_epoch_handler(self, engine, is_test):
+    def testing_end_epoch_handler(self, engine, is_train):
         save_json(engine.state.annotations, self.results_path)
-        if not is_test:
+        if is_train:
             print('-' * 40)
             evaluate(candidate_path=self.results_path)
             raw_caption_scores = load_json(self.eval_path)
