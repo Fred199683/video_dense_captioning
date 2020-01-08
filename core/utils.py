@@ -46,6 +46,9 @@ def save_json(data, path):
         json.dump(data, f)
 
 
-def evaluate(candidate_path='./data/val/val.candidate.captions.json', references_path=['data/val_1.json', 'data/val_2.json'], get_scores=False):
+def evaluate(candidate_path='./data/val/val.candidate.captions.json', references_path=['data/val_1.json', 'data/val_2.json'], verbose=False):
     python = '/home/nii/anaconda3/envs/py27/bin/python'
-    subprocess.call('cd densevid_eval && ' + python + ' evaluate.py -s ' + os.path.abspath(candidate_path), shell=True, stdout=subprocess.PIPE)
+    if verbose:
+        subprocess.call(' '.join(['cd densevid_eval &&', python, 'evaluate.py -s', os.path.abspath(candidate_path)]), shell=True, stdout=subprocess.PIPE)
+    else:
+        subprocess.call(' '.join(['cd densevid_eval &&', python, 'evaluate.py -s', os.path.abspath(candidate_path), '-v']), shell=True)
