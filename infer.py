@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from core.solver import CaptioningSolver, infer_collate
 from core.dataset import CocoCaptionDataset
-from core.utils import load_json
+from core.utils import load_json, evaluate
 from config import config as cfg
 
 
@@ -12,6 +12,7 @@ def main():
 
     batch_size = cfg.SOLVER.INFER.BATCH_SIZE
     caption_file = cfg.DATASET.VAL.CAPTION_PATH
+    result_file = cfg.SOLVER.INFER.RESULT_PATH
     is_validation = cfg.VAL.ENABLED
 
     # load dataset and vocab
@@ -21,6 +22,8 @@ def main():
 
     solver = CaptioningSolver(word_to_idx)
     solver.test(test_loader, is_validation)
+
+    evaluate(result_file, verbose=True)
 
 
 if __name__ == "__main__":
