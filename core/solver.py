@@ -115,7 +115,8 @@ class CaptioningSolver(object):
         self._end = word_to_idx['<END>']
         self.idx_to_word = {i: w for w, i in word_to_idx.items()}
 
-        self.batch_size = cfg.SOLVER.TRAIN.BATCH_SIZE
+        self.train_batch_size = cfg.SOLVER.TRAIN.BATCH_SIZE
+        self.infer_batch_size = cfg.SOLVER.INFER.BATCH_SIZE
         self.update_rule = cfg.SOLVER.TRAIN.OPTIM
         self.learning_rate = cfg.SOLVER.TRAIN.LR
         self.n_epochs = cfg.SOLVER.TRAIN.N_EPOCHS
@@ -144,8 +145,8 @@ class CaptioningSolver(object):
             self.init_best_scores = {score_name: 0. for score_name in self.capture_scores}
 
         if self.is_train:
-            self.train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4, collate_fn=train_collate)
-            self.val_loader = DataLoader(val_dataset, batch_size=self.batch_size, num_workers=4, collate_fn=infer_collate)
+            self.train_loader = DataLoader(train_dataset, batch_size=self.train_batch_size, shuffle=True, num_workers=4, collate_fn=train_collate)
+            self.val_loader = DataLoader(val_dataset, batch_size=self.infer_batch_size, num_workers=4, collate_fn=infer_collate)
 
             # set an optimizer by update rule
             params = list(self.event_rnn.parameters()) + list(self.caption_rnn.parameters())
