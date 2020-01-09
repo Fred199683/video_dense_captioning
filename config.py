@@ -43,7 +43,7 @@ config.SOLVER.TRAIN.BATCH_SIZE = 16                         # batch size being u
 config.SOLVER.TRAIN.EVAL_STEPS = 500                        # steps taken before evaluation during training
 config.SOLVER.TRAIN.CKPT_DIR = 'checkpoint/'                # path to dir saving checkpoints during training
 config.SOLVER.TRAIN.LOG_DIR = 'log/'                        # path to logging dir
-config.SOLVER.TRAIN.ALPHA_C = 1.0                           # param for training a constrain to alphas, make the attention spread over entire sequence (caption).
+config.SOLVER.TRAIN.ALPHA_C = 0.2                           # param for training a constrain to alphas, make the attention spread over entire sequence (caption).
 config.SOLVER.TRAIN.CAPTURED_METRICS = ['meteor', 'cider']  # metrics to be captured and logged while training
 
 config.SOLVER.INFER.BATCH_SIZE = 64                         # batch size being used while training
