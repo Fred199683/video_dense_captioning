@@ -250,7 +250,7 @@ class CaptioningSolver(object):
 
         caption_scores = self.test(self.val_loader, is_validation=True)
         for metric, score in caption_scores.items():
-            self.writer.add_scalar(metric, score, iteration)
+            self.writer.add_scalar(metric, score, epoch)
         for metric, score in engine.state.best_scores.items():
             if score < caption_scores[metric]:
                 engine.state.best_scores[metric] = caption_scores[metric]
@@ -289,12 +289,11 @@ class CaptioningSolver(object):
                                                             e_hidden_states[:, :batch_size], e_cell_states[:, :batch_size], c_hidden_states[:, :batch_size])
             c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(e_hidden_states)
 
-            # feats_alphas = []
             loss, acc, count_mask = 0., 0., 0.
-            sample_caption = []
+            feats_alphas, sample_caption = [], []
+            captions_mask = captions_masks[:, event_idx, :]
             for caption_idx in range(cap_vecs.size(2) - 1):
                 curr_cap_vecs = cap_vecs[:, event_idx, caption_idx]
-                captions_mask = captions_masks[:, event_idx, :]
 
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
                                                                                          caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size],
@@ -306,14 +305,16 @@ class CaptioningSolver(object):
                 mask_next_cap_vecs = (next_cap_vecs != self._null)
                 acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
                 count_mask += torch.sum(mask_next_cap_vecs).item()
-                # feats_alphas.append(feats_alpha)
+                feats_alphas.append(feats_alpha)
 
                 sample_caption.append(torch.argmax(logits[0]).item())
 
-            # if self.alpha_c > 0:
-            #    sum_loc_alphas = torch.sum(nn.utils.rnn.pad_sequence(feats_alphas), 1)
-            #    feats_alphas_reg = self.alpha_c * self.alpha_criterion(sum_loc_alphas, (seq_lens / self.model.L).repeat(1, self.model.L))
-            #    loss += feats_alphas_reg
+            if self.alpha_c > 0:
+                caption_lens = torch.sum(cap_vecs[:, event_idx, :] != self._null, dim=-1)
+                event_lens = torch.sum(captions_mask, dim=-1)
+                sum_loc_alphas = torch.sum(nn.utils.rnn.pad_sequence(feats_alphas), 1)  # N x maxL
+                feats_alphas_reg = self.alpha_c * self.alpha_criterion(sum_loc_alphas, (caption_lens / event_lens).repeat(1, sum_loc_alphas.size(-1)))
+                loss += feats_alphas_reg
 
             loss /= caption_features.size(0)
             losses += loss
