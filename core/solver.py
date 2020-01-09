@@ -291,12 +291,12 @@ class CaptioningSolver(object):
 
             loss, acc, count_mask = 0., 0., 0.
             feats_alphas, sample_caption = [], []
-            captions_mask = captions_masks[:, event_idx, :]
+            captions_mask = captions_masks[:batch_size, event_idx, :]
             for caption_idx in range(cap_vecs.size(2) - 1):
                 curr_cap_vecs = cap_vecs[:, event_idx, caption_idx]
 
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
-                                                                                         caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size],
+                                                                                         caption_features_proj[:batch_size, event_idx], captions_mask,
                                                                                          c_hidden_states[:, :batch_size], c_cell_states[:, :batch_size], curr_cap_vecs[:batch_size])
 
                 next_cap_vecs = cap_vecs[:batch_size, event_idx, caption_idx + 1]
