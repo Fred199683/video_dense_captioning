@@ -310,8 +310,8 @@ class CaptioningSolver(object):
                 sample_caption.append(torch.argmax(logits[0]).item())
 
             if self.alpha_c > 0:
-                caption_lens = torch.sum(cap_vecs[:, event_idx, :] != self._null, dim=-1, keepdim=True)
-                event_lens = torch.sum(captions_mask, dim=-1, keepdim=True)
+                caption_lens = torch.sum(cap_vecs[:, event_idx, :] != self._null, dim=-1, keepdim=True).float()
+                event_lens = torch.sum(captions_mask, dim=-1, keepdim=True).float()
                 sum_loc_alphas = torch.sum(nn.utils.rnn.pad_sequence(feats_alphas), 1)  # N x maxL
                 feats_alphas_reg = self.alpha_c * self.alpha_criterion(sum_loc_alphas, (caption_lens / event_lens).repeat(1, sum_loc_alphas.size(-1)))
                 loss += feats_alphas_reg
