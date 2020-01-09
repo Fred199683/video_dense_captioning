@@ -248,7 +248,7 @@ class CaptioningSolver(object):
         self.writer.add_scalar('Loss', loss, iteration)
         self.writer.add_scalar('Accuracy', acc, iteration)
 
-        caption_scores = self.test(is_validation=True)
+        caption_scores = self.test(self.val_loader, is_validation=True)
         for metric, score in caption_scores.items():
             self.writer.add_scalar(metric, score, iteration)
         for metric, score in engine.state.best_scores.items():
@@ -289,7 +289,7 @@ class CaptioningSolver(object):
                                                             e_hidden_states[:, :batch_size], e_cell_states[:, :batch_size], c_hidden_states[:, :batch_size])
             c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(e_hidden_states)
 
-            # feats_alphas = []
+            feats_alphas = []
             loss, acc, count_mask = 0., 0., 0.
             sample_caption = []
             for caption_idx in range(cap_vecs.size(2) - 1):
@@ -306,14 +306,14 @@ class CaptioningSolver(object):
                 mask_next_cap_vecs = (next_cap_vecs != self._null)
                 acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
                 count_mask += torch.sum(mask_next_cap_vecs).item()
-                # feats_alphas.append(feats_alpha)
+                feats_alphas.append(feats_alpha)
 
                 sample_caption.append(torch.argmax(logits[0]).item())
 
-            # if self.alpha_c > 0:
-            #    sum_loc_alphas = torch.sum(nn.utils.rnn.pad_sequence(feats_alphas), 1)
-            #    feats_alphas_reg = self.alpha_c * self.alpha_criterion(sum_loc_alphas, (seq_lens / self.model.L).repeat(1, self.model.L))
-            #    loss += feats_alphas_reg
+            if self.alpha_c > 0:
+               sum_loc_alphas = torch.sum(nn.utils.rnn.pad_sequence(feats_alphas), 1)
+               feats_alphas_reg = self.alpha_c * self.alpha_criterion(sum_loc_alphas, (seq_lens / self.model.L).repeat(1, self.model.L))
+               loss += feats_alphas_reg
 
             loss /= caption_features.size(0)
             losses += loss
