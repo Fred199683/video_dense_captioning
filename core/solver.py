@@ -120,7 +120,7 @@ class CaptioningSolver(object):
         self.update_rule = cfg.SOLVER.TRAIN.OPTIM
         self.learning_rate = cfg.SOLVER.TRAIN.LR
         self.n_epochs = cfg.SOLVER.TRAIN.N_EPOCHS
-        self.alpha_c = kwargs.pop('alpha_c', 1.0)
+        self.alpha_c = cfg.SOLVER.TRAIN.ALPHA_C
         self.eval_every = cfg.SOLVER.TRAIN.EVAL_STEPS
         self.log_path = cfg.SOLVER.TRAIN.LOG_DIR
         self.checkpoint_dir = cfg.SOLVER.TRAIN.CKPT_DIR
