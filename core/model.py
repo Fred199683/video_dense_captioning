@@ -194,6 +194,7 @@ class CaptionRNN(nn.Module):
         return out_logits
 
     def forward(self, features, features_proj, mask, event_hidden_states, hidden_states, cell_states, past_captions):
+        print(features_proj.size())
         emb_captions = self.word_embedding(inputs=past_captions)
 
         feats_context, feats_alpha = self._attention_layer(features, features_proj, mask, hidden_states)

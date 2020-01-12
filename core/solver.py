@@ -287,7 +287,7 @@ class CaptioningSolver(object):
             batch_size = batch_sizes[event_idx]
             e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features[:batch_size], event_features_proj[:batch_size], events_mask[:batch_size],
                                                             e_hidden_states[:, :batch_size], e_cell_states[:, :batch_size], c_hidden_states[:, :batch_size])
-            c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(caption_features_proj[:batch_size][event_idx])
+            c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(caption_features_proj[:batch_size, event_idx])
 
             loss, acc, count_mask = 0., 0., 0.
             sample_caption = []
