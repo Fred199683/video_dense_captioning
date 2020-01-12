@@ -15,7 +15,6 @@ from __future__ import division
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import sys
 
 
 def mask_softmax(preds, mask, dim=-1):
@@ -102,24 +101,6 @@ class EventRNN(nn.Module):
         next_input = torch.cat((caption_hidden_states.squeeze(0), feature), 1).unsqueeze(0)
 
         output, (next_hidden_states, next_cell_states) = self.lstm_cell(next_input, (hidden_states, cell_states))
-
-        if torch.sum(torch.isnan(next_hidden_states)) > 0:
-            print('-' * 80)
-            print('error in event rnn at index %d.' % feature_idx)
-            if torch.sum(torch.isnan(next_input)) > 0:
-                print(torch.sum(torch.isnan(next_input)).item())
-                print('\terror in next_input')
-                print(next_input)
-            if torch.sum(torch.isnan(hidden_states)) > 0:
-                print(torch.sum(torch.isnan(hidden_states)).item())
-                print('\terror in hidden_states')
-                print(hidden_states)
-            if torch.sum(torch.isnan(cell_states)) > 0:
-                print(torch.sum(torch.isnan(cell_states)).item())
-                print('\terror in cell_states')
-                print(cell_states)
-            print('-' * 80)
-            sys.exit()
 
         return next_hidden_states, next_cell_states
 
