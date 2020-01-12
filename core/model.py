@@ -141,10 +141,12 @@ class CaptionRNN(nn.Module):
         self.dropout = nn.Dropout(p=self.dropout)
 
     def get_initial_lstm(self, feats_proj):
+        print(feats_proj.size())
         feats_mean = torch.mean(feats_proj, 1)
         h = torch.tanh(self.hidden_state_init_layer(feats_mean)).unsqueeze(0)
         c = torch.tanh(self.cell_state_init_layer(feats_mean)).unsqueeze(0)
-        return c, h
+        print(h.size())
+        return h, c
 
     def zero_hidden_states(self, batch_size):
         return torch.zeros(1, batch_size, self.H, device=self.device)
@@ -164,7 +166,6 @@ class CaptionRNN(nn.Module):
         return embed_inputs
 
     def _attention_layer(self, features, features_proj, mask, hidden_states):
-        print(hidden_states.size(), features_proj.size())
         h_att = F.relu(features_proj + self.hidden_to_attention_layer(hidden_states[-1]).unsqueeze(1))    # (N, L, D)
         loc, dim = features_proj.size()[1:]
         out_att = self.attention_layer(h_att.view(-1, dim)).view(-1, loc)   # (N, L)
