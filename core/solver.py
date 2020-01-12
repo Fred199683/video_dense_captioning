@@ -294,6 +294,7 @@ class CaptioningSolver(object):
             # feats_alphas = []
             captions_mask = captions_masks[:batch_size, event_idx, :]
             for caption_idx in range(cap_vecs.size(2) - 1):
+                print(e_hidden_states.size())
                 curr_cap_vecs = cap_vecs[:, event_idx, caption_idx]
 
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
