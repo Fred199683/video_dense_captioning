@@ -379,9 +379,9 @@ class CaptioningSolver(object):
 
             e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features[:batch_size], event_features_proj[:batch_size], events_mask[:batch_size],
                                                             e_hidden_states[:, :batch_size], e_cell_states[:, :batch_size], c_hidden_states[:, :batch_size])
-            c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(e_hidden_states)
+            c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(caption_features_proj[:batch_size][event_idx])
 
-            cap_vecs = self.beam_decoder.decode(caption_features[:batch_size, event_idx], caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size], c_hidden_states, c_cell_states)
+            cap_vecs = self.beam_decoder.decode(caption_features[:batch_size, event_idx], caption_features_proj[:batch_size, event_idx], captions_mask[:batch_size], e_hidden_states, c_hidden_states, c_cell_states)
 
             sentences = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
             for video_id, event_timestamps, sentence in zip(video_ids, timestamps, sentences):
