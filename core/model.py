@@ -122,8 +122,9 @@ class CaptionRNN(nn.Module):
 
         # Trainable parameters :
         self.lstm_cell = nn.LSTM(self.H + self.D + self.M, self.H, dropout=0.5)
-        self.embedding_lookup = nn.Embedding(self.V, self.M)
         self.hidden_state_init_layer = nn.Linear(self.D, self.H)
+        self.cell_state_init_layer = nn.Linear(self.D, self.H)
+        self.embedding_lookup = nn.Embedding(self.V, self.M)
         self.feats_proj_layer = nn.Linear(self.D, self.D)
         self.hidden_to_attention_layer = nn.Linear(self.H, self.D)
         self.attention_layer = nn.Linear(self.D, 1)
