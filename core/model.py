@@ -164,6 +164,7 @@ class CaptionRNN(nn.Module):
         return embed_inputs
 
     def _attention_layer(self, features, features_proj, mask, hidden_states):
+        print(hidden_states.size(), features_proj.size())
         h_att = F.relu(features_proj + self.hidden_to_attention_layer(hidden_states[-1]).unsqueeze(1))    # (N, L, D)
         loc, dim = features_proj.size()[1:]
         out_att = self.attention_layer(h_att.view(-1, dim)).view(-1, loc)   # (N, L)
