@@ -121,13 +121,14 @@ class CaptionRNN(nn.Module):
         self.device = cfg.DEVICE
 
         # Trainable parameters :
-        self.lstm_cell = nn.LSTM(self.D + self.M, self.H, dropout=0.5)
+        self.lstm_cell = nn.LSTM(self.H + self.D + self.M, self.H, dropout=0.5)
         self.embedding_lookup = nn.Embedding(self.V, self.M)
         self.feats_proj_layer = nn.Linear(self.D, self.D)
         self.hidden_to_attention_layer = nn.Linear(self.H, self.D)
         self.attention_layer = nn.Linear(self.D, 1)
 
         self.features_selector_layer = nn.Linear(self.H, 1)
+        self.event_ctx_selector_layer = nn.Linear(self.H, 1)
 
         self.hidden_to_embedding_layer = nn.Linear(self.H, self.M)
         self.features_context_to_embedding_layer = nn.Linear(self.D, self.M)
@@ -137,9 +138,10 @@ class CaptionRNN(nn.Module):
         self.features_norm_layer = nn.LayerNorm(self.D)
         self.dropout = nn.Dropout(p=self.dropout)
 
-    def get_initial_lstm(self, event_hidden_states):
-        h = event_hidden_states
-        c = event_hidden_states
+    def get_initial_lstm(self, feats_proj):
+        feats_mean = torch.mean(feats_proj, 1)
+        h = torch.tanh(self.hidden_state_init_layer(feats_mean)).unsqueeze(0)
+        c = torch.tanh(self.cell_state_init_layer(feats_mean)).unsqueeze(0)
         return c, h
 
     def zero_hidden_states(self, batch_size):
@@ -167,8 +169,8 @@ class CaptionRNN(nn.Module):
         context = torch.sum(features * alpha.unsqueeze(2), 1)   # (N, D)
         return context, alpha
 
-    def _selector(self, context, hidden_states):
-        beta = torch.sigmoid(self.features_selector_layer(hidden_states[-1]))    # (N, 1)
+    def _selector(self, context, hidden_states, selector_layer):
+        beta = torch.sigmoid(selector_layer(hidden_states[-1]))    # (N, 1)
         context = context * beta
         return context, beta
 
@@ -187,15 +189,16 @@ class CaptionRNN(nn.Module):
         out_logits = self.embedding_to_output_layer(h_logits)
         return out_logits
 
-    def forward(self, features, features_proj, mask, hidden_states, cell_states, past_captions):
+    def forward(self, features, features_proj, mask, event_hidden_states, hidden_states, cell_states, past_captions):
         emb_captions = self.word_embedding(inputs=past_captions)
 
         feats_context, feats_alpha = self._attention_layer(features, features_proj, mask, hidden_states)
 
         if self.enable_selector:
-            feats_context, feats_beta = self._selector(feats_context, hidden_states)
+            feats_context, feats_beta = self._selector(feats_context, hidden_states, self.features_selector_layer)
+            event_hidden_states, event_beta = self._selector(event_hidden_states, hidden_states, self.event_ctx_selector_layer)
 
-        next_input = torch.cat((emb_captions, feats_context), 1).unsqueeze(0)
+        next_input = torch.cat((emb_captions, feats_context, event_hidden_states), 1).unsqueeze(0)
 
         output, (next_hidden_states, next_cell_states) = self.lstm_cell(next_input, (hidden_states, cell_states))
 
