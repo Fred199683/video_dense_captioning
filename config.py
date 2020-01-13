@@ -46,7 +46,7 @@ config.SOLVER.TRAIN.LOG_DIR = 'log/'                        # path to logging di
 config.SOLVER.TRAIN.ALPHA_C = 0.1                           # param for training a constrain to alphas, make the attention spread over entire sequence (caption).
 config.SOLVER.TRAIN.CAPTURED_METRICS = ['meteor', 'cider']  # metrics to be captured and logged while training
 
-config.SOLVER.INFER.BATCH_SIZE = 64                         # batch size being used while training
+config.SOLVER.INFER.BATCH_SIZE = 128                        # batch size being used while training
 config.SOLVER.INFER.N_TIME_STEPS = 50                       # number of time steps in inference
 config.SOLVER.INFER.BEAM_SIZE = 3                           # beam size being used while inference
 config.SOLVER.INFER.LEN_NORM = 0.4                          # length normalization being used while inference
