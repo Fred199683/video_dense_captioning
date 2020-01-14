@@ -248,10 +248,11 @@ class CaptioningSolver(object):
         epoch = engine.state.epoch
         loss, acc = engine.state.output
 
-        print('-' * 40)
+        print('-' * 50)
         print('Complete Epoch: {}, Loss:{}, Accuracy:{}'.format(epoch, loss, acc))
         self.writer.add_scalar('Loss', loss, iteration)
         self.writer.add_scalar('Accuracy', acc, iteration)
+        print('-' * 50)
 
         caption_scores = self.test(self.val_loader, is_validation=True)
         for metric, score in caption_scores.items():
@@ -262,8 +263,9 @@ class CaptioningSolver(object):
                 self._save(epoch, iteration, loss, engine.state.best_scores, prefix='best_' + metric)
         
         self.p_sampling = min(self.p_sampling + .25, 1.)
-        print('Sampling possibility: %f' % self.p_sampling)
-        print('-' * 40)
+        print('-' * 50)
+        print('Update Sampling possibility: %f' % self.p_sampling)
+        print('-' * 50)
 
         self._save(epoch, iteration, engine.state.output[0], engine.state.best_scores)
 
