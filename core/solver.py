@@ -141,6 +141,7 @@ class CaptioningSolver(object):
         if self.checkpoint is not None:
             self._load(self.checkpoint, is_train=self.is_train)
         else:
+            self.p_sampling = 0
             self.start_iter = 0
             self.init_best_scores = {score_name: 0. for score_name in self.capture_scores}
 
@@ -156,7 +157,7 @@ class CaptioningSolver(object):
                 self.optimizer = optim.RMSprop(params=params, lr=self.learning_rate)
 
             self.word_criterion = nn.CrossEntropyLoss(ignore_index=self._null, reduction='sum')
-            self.alpha_criterion = nn.MSELoss(reduction='sum')
+            # self.alpha_criterion = nn.MSELoss(reduction='sum')
 
             self.train_engine = Engine(self._train)
 
@@ -187,6 +188,7 @@ class CaptioningSolver(object):
                       'event_state_dict': self.event_rnn.state_dict(),
                       'caption_state_dict': self.caption_rnn.state_dict(),
                       'optimizer_state_dict': self.optimizer.state_dict(),
+                      'p_sampling': self.p_sampling,
                       'loss': loss}
         for metric, score in best_scores.items():
             model_dict[metric] = score
@@ -200,8 +202,11 @@ class CaptioningSolver(object):
         checkpoint = torch.load(model_path)
         self.event_rnn.load_state_dict(checkpoint['event_state_dict'])
         self.caption_rnn.load_state_dict(checkpoint['caption_state_dict'])
+
         if is_train:
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.p_sampling = checkpoint['p_sampling']
+
         self.start_iter = checkpoint['iteration']
         self.init_best_scores = {score_name: checkpoint[score_name] for score_name in self.capture_scores}
 
@@ -255,6 +260,8 @@ class CaptioningSolver(object):
             if score < caption_scores[metric]:
                 engine.state.best_scores[metric] = caption_scores[metric]
                 self._save(epoch, iteration, loss, engine.state.best_scores, prefix='best_' + metric)
+        
+        self.p_sampling = min(self.p_sampling + .25, 1.)
 
         self._save(epoch, iteration, engine.state.output[0], engine.state.best_scores)
 
@@ -285,8 +292,13 @@ class CaptioningSolver(object):
         sample_captions = []
         for event_idx in range(event_features.size(1)):
             batch_size = batch_sizes[event_idx]
-            e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features[:batch_size], event_features_proj[:batch_size], events_mask[:batch_size],
-                                                            e_hidden_states[:, :batch_size], e_cell_states[:, :batch_size], c_hidden_states[:, :batch_size])
+            e_hidden_states, e_cell_states = self.event_rnn(event_idx,
+                                                            event_features[:batch_size],
+                                                            event_features_proj[:batch_size],
+                                                            events_mask[:batch_size],
+                                                            e_hidden_states[:, :batch_size],
+                                                            e_cell_states[:, :batch_size],
+                                                            c_hidden_states[:, :batch_size])
             c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(caption_features_proj[:batch_size, event_idx])
 
             loss, acc, count_mask = 0., 0., 0.
@@ -295,11 +307,18 @@ class CaptioningSolver(object):
             captions_mask = captions_masks[:batch_size, event_idx, :]
             for caption_idx in range(cap_vecs.size(2) - 1):
                 curr_cap_vecs = cap_vecs[:, event_idx, caption_idx]
+                print(curr_cap_vecs.size())
+                #curr_cap_vecs = torch.where(torch.rand_like(logits) < self.p_sampling, 
+                #                            logits, cap_vecs[:batch_size, event_idx, caption_idx])
 
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
-                                                                                         caption_features_proj[:batch_size, event_idx], captions_mask,
+                                                                                         caption_features_proj[:batch_size, event_idx],
+                                                                                         captions_mask,
                                                                                          e_hidden_states.squeeze(0),
-                                                                                         c_hidden_states[:, :batch_size], c_cell_states[:, :batch_size], curr_cap_vecs[:batch_size])
+                                                                                         c_hidden_states[:, :batch_size],
+                                                                                         c_cell_states[:, :batch_size],
+                                                                                         curr_cap_vecs[:batch_size])
+                print(logits.size())
 
                 next_cap_vecs = cap_vecs[:batch_size, event_idx, caption_idx + 1]
                 loss += self.word_criterion(logits, next_cap_vecs)
@@ -377,14 +396,21 @@ class CaptioningSolver(object):
             batch_size = batch_sizes[event_idx]
             captions_mask = captions_masks[:, event_idx, :]
 
-            e_hidden_states, e_cell_states = self.event_rnn(event_idx, event_features[:batch_size], event_features_proj[:batch_size], events_mask[:batch_size],
-                                                            e_hidden_states[:, :batch_size], e_cell_states[:, :batch_size], c_hidden_states[:, :batch_size])
+            e_hidden_states, e_cell_states = self.event_rnn(event_idx,
+                                                            event_features[:batch_size],
+                                                            event_features_proj[:batch_size],
+                                                            events_mask[:batch_size],
+                                                            e_hidden_states[:, :batch_size],
+                                                            e_cell_states[:, :batch_size],
+                                                            c_hidden_states[:, :batch_size])
             c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(caption_features_proj[:batch_size, event_idx])
 
-            cap_vecs = self.beam_decoder.decode(caption_features[:batch_size, event_idx], caption_features_proj[:batch_size, event_idx], 
+            cap_vecs = self.beam_decoder.decode(caption_features[:batch_size, event_idx],
+                                                caption_features_proj[:batch_size, event_idx], 
                                                 captions_mask[:batch_size], 
                                                 e_hidden_states.squeeze(0), 
-                                                c_hidden_states, c_cell_states)
+                                                c_hidden_states,
+                                                c_cell_states)
 
             sentences = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
             for video_id, event_timestamps, sentence in zip(video_ids, timestamps, sentences):
