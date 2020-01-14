@@ -222,6 +222,7 @@ class CaptioningSolver(object):
         print('-' * 40)
         print('Start training at Epoch %d - Iteration %d' % (engine.state.epoch + 1, engine.state.iteration + 1))
         print('Number of iterations per epoch: %d' % len(self.train_loader))
+        print('Sampling possibility: %f' % self.p_sampling)
         print('-' * 40)
 
     def training_end_iter_handler(self, engine):
@@ -249,7 +250,6 @@ class CaptioningSolver(object):
 
         print('-' * 40)
         print('Complete Epoch: {}, Loss:{}, Accuracy:{}'.format(epoch, loss, acc))
-        print('-' * 40)
         self.writer.add_scalar('Loss', loss, iteration)
         self.writer.add_scalar('Accuracy', acc, iteration)
 
@@ -262,6 +262,8 @@ class CaptioningSolver(object):
                 self._save(epoch, iteration, loss, engine.state.best_scores, prefix='best_' + metric)
         
         self.p_sampling = min(self.p_sampling + .25, 1.)
+        print('Sampling possibility: %f' % self.p_sampling)
+        print('-' * 40)
 
         self._save(epoch, iteration, engine.state.output[0], engine.state.best_scores)
 
@@ -306,7 +308,7 @@ class CaptioningSolver(object):
             # feats_alphas = []
             captions_mask = captions_masks[:batch_size, event_idx, :]
             for caption_idx in range(cap_vecs.size(2) - 1):
-                if caption_idx > 0:
+                if caption_idx > 0 and self.p_sampling > 0:
                     true_caps = cap_vecs[:batch_size, event_idx, caption_idx]
                     sampled_caps = torch.argmax(logits, dim=-1)[:batch_size]
                     current_caps = torch.where(torch.rand_like(sampled_caps) < self.p_sampling, sampled_caps, true_caps)
