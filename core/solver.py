@@ -310,7 +310,7 @@ class CaptioningSolver(object):
             # feats_alphas = []
             captions_mask = captions_masks[:batch_size, event_idx, :]
             for caption_idx in range(cap_vecs.size(2) - 1):
-                if caption_idx > 0:
+                if caption_idx > 0 and self.p_sampling > 0:
                     true_caps = cap_vecs[:batch_size, event_idx, caption_idx]
                     sampled_caps = torch.argmax(logits, dim=-1)[:batch_size]
                     current_caps = torch.where(torch.rand_like(sampled_caps.float()) < self.p_sampling, sampled_caps, true_caps)
