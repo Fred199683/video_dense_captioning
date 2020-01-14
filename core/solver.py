@@ -306,10 +306,9 @@ class CaptioningSolver(object):
             # feats_alphas = []
             captions_mask = captions_masks[:batch_size, event_idx, :]
             for caption_idx in range(cap_vecs.size(2) - 1):
-                curr_cap_vecs = cap_vecs[:, event_idx, caption_idx]
-                print(curr_cap_vecs.size())
-                #curr_cap_vecs = torch.where(torch.rand_like(logits) < self.p_sampling, 
-                #                            logits, cap_vecs[:batch_size, event_idx, caption_idx])
+                true_caps = cap_vecs[:batch_size, event_idx, caption_idx]
+                sampled_caps = torch.argmax(logits, dim=-1)[:batch_size]
+                current_caps = torch.where(torch.rand_like(sampled_caps) < self.p_sampling, sampled_caps, true_caps)
 
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
                                                                                          caption_features_proj[:batch_size, event_idx],
@@ -317,8 +316,7 @@ class CaptioningSolver(object):
                                                                                          e_hidden_states.squeeze(0),
                                                                                          c_hidden_states[:, :batch_size],
                                                                                          c_cell_states[:, :batch_size],
-                                                                                         curr_cap_vecs[:batch_size])
-                print(logits.size())
+                                                                                         current_caps)
 
                 next_cap_vecs = cap_vecs[:batch_size, event_idx, caption_idx + 1]
                 loss += self.word_criterion(logits, next_cap_vecs)
