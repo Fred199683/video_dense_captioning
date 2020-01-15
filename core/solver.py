@@ -262,7 +262,7 @@ class CaptioningSolver(object):
                 engine.state.best_scores[metric] = caption_scores[metric]
                 self._save(epoch, iteration, loss, engine.state.best_scores, prefix='best_' + metric)
 
-        # self.p_sampling = min(self.p_sampling + .1, 1.)
+        self.p_sampling = min(self.p_sampling + 1. / 15, 1.)
         print('-' * 50)
         print('Update Sampling possibility: %f' % self.p_sampling)
         print('-' * 50)
