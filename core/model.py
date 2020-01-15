@@ -33,7 +33,7 @@ class EventRNN(nn.Module):
         self.H = cfg.MODEL.ERNN.D_HIDDEN
 
         # Trainable parameters :
-        self.lstm_cell = nn.LSTM(self.D + self.H, self.H, dropout=0.5)
+        self.lstm_cell = nn.LSTM(self.D + self.H, self.H)
         self.hidden_state_init_layer = nn.Linear(self.D, self.H)
         self.cell_state_init_layer = nn.Linear(self.D, self.H)
         self.feats_proj_layer = nn.Linear(self.D, self.D)
@@ -112,7 +112,7 @@ class CaptionRNN(nn.Module):
         self.prev2out = cfg.MODEL.CRNN.ENABLE_PREV2OUT
         self.ctx2out = cfg.MODEL.CRNN.ENABLE_CTX2OUT
         self.enable_selector = cfg.MODEL.CRNN.ENABLE_SELECTOR
-        self.dropout = cfg.MODEL.CRNN.DROPOUT
+        # self.dropout = cfg.MODEL.CRNN.DROPOUT
         self.V = vocab_length
         self.D = cfg.MODEL.CRNN.D_FEATURE  # size of each region feature
         self.M = cfg.MODEL.CRNN.D_EMBED
@@ -121,7 +121,7 @@ class CaptionRNN(nn.Module):
         self.device = cfg.DEVICE
 
         # Trainable parameters :
-        self.lstm_cell = nn.LSTM(self.H + self.D + self.M, self.H, dropout=0.5)
+        self.lstm_cell = nn.LSTM(self.H + self.D + self.M, self.H)
         self.hidden_state_init_layer = nn.Linear(self.D, self.H)
         self.cell_state_init_layer = nn.Linear(self.D, self.H)
         self.embedding_lookup = nn.Embedding(self.V, self.M)
@@ -138,7 +138,7 @@ class CaptionRNN(nn.Module):
 
         # functional layers
         self.features_norm_layer = nn.LayerNorm(self.D)
-        self.dropout = nn.Dropout(p=self.dropout)
+        # self.dropout = nn.Dropout(p=self.dropout)
 
     def get_initial_lstm(self, feats_proj):
         feats_mean = torch.mean(feats_proj, 1)
@@ -177,7 +177,7 @@ class CaptionRNN(nn.Module):
         return context, beta
 
     def _decode_lstm(self, x, h, feats_context):
-        h = self.dropout(h)
+        # h = self.dropout(h)
         h_logits = self.hidden_to_embedding_layer(h)
 
         if self.ctx2out:
@@ -187,7 +187,7 @@ class CaptionRNN(nn.Module):
             h_logits += x
         h_logits = torch.tanh(h_logits)
 
-        h_logits = self.dropout(h_logits)
+        # h_logits = self.dropout(h_logits)
         out_logits = self.embedding_to_output_layer(h_logits)
         return out_logits
 
