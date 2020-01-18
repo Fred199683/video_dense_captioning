@@ -205,7 +205,7 @@ class CaptioningSolver(object):
 
         if is_train:
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            self.p_sampling = checkpoint['p_sampling']
+            # self.p_sampling = checkpoint['p_sampling']
 
         self.start_iter = checkpoint['iteration']
         self.init_best_scores = {score_name: checkpoint[score_name] for score_name in self.capture_scores}
@@ -262,7 +262,7 @@ class CaptioningSolver(object):
                 engine.state.best_scores[metric] = caption_scores[metric]
                 self._save(epoch, iteration, loss, engine.state.best_scores, prefix='best_' + metric)
 
-        self.p_sampling = min(self.p_sampling + 1. / 15, 1.)
+        # self.p_sampling = min(self.p_sampling + 1. / 15, 1.)
         print('-' * 50)
         print('Update Sampling possibility: %f' % self.p_sampling)
         print('-' * 50)
@@ -307,15 +307,9 @@ class CaptioningSolver(object):
 
             loss, acc, count_mask = 0., 0., 0.
             sample_caption = []
-            # feats_alphas = []
             captions_mask = captions_masks[:batch_size, event_idx, :]
             for caption_idx in range(cap_vecs.size(2) - 1):
-                if caption_idx > 0 and self.p_sampling > 0:
-                    true_caps = cap_vecs[:batch_size, event_idx, caption_idx]
-                    sampled_caps = torch.argmax(logits, dim=-1)[:batch_size]
-                    current_caps = torch.where(torch.rand_like(sampled_caps.float()) < self.p_sampling, sampled_caps, true_caps)
-                else:
-                    current_caps = cap_vecs[:batch_size, event_idx, caption_idx]
+                current_caps = cap_vecs[:batch_size, event_idx, caption_idx]
 
                 logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
                                                                                          caption_features_proj[:batch_size, event_idx],
@@ -331,18 +325,10 @@ class CaptioningSolver(object):
                 mask_next_cap_vecs = (next_cap_vecs != self._null)
                 acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
                 count_mask += torch.sum(mask_next_cap_vecs).item()
-                # feats_alphas.append(feats_alpha)
 
                 sample_caption.append(torch.argmax(logits[0]).item())
 
-            # if self.alpha_c > 0:
-            #     caption_lens = torch.sum(cap_vecs[:batch_size, event_idx, :] != self._null, dim=-1, keepdim=True).float()
-            #     event_lens = torch.sum(captions_mask, dim=-1, keepdim=True).float()
-            #     sum_loc_alphas = torch.sum(nn.utils.rnn.pad_sequence(feats_alphas), 1)  # N x maxL
-            #     feats_alphas_reg = self.alpha_c * self.alpha_criterion(sum_loc_alphas, (caption_lens / event_lens).repeat(1, sum_loc_alphas.size(-1)))
-            #     loss += feats_alphas_reg
-
-            loss /= caption_features.size(0)
+            loss /= batch_size
             losses += loss
             accs += acc / count_mask
 
