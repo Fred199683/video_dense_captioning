@@ -12,7 +12,7 @@ import os
 
 from .utils import save_json, load_json, evaluate, decode_captions
 from .dataset import CocoCaptionDataset
-from .beam_decoder import BeamSearchDecoder
+from .decoder import Decoder
 
 from .model import EventRNN, CaptionRNN
 
@@ -136,7 +136,7 @@ class CaptioningSolver(object):
         self.event_rnn = EventRNN(cfg).to(self.device)
         self.caption_rnn = CaptionRNN(cfg, len(word_to_idx)).to(self.device)
 
-        self.beam_decoder = BeamSearchDecoder(self.caption_rnn, len(self.idx_to_word), self._start, self._end, cfg)
+        self.decoder = Decoder(self.caption_rnn, len(self.idx_to_word), self._start, self._end, cfg)
 
         if self.checkpoint is not None:
             self._load(self.checkpoint, is_train=self.is_train)
@@ -269,6 +269,33 @@ class CaptioningSolver(object):
 
         self._save(epoch, iteration, engine.state.output[0], engine.state.best_scores)
 
+    def _teacher_forcing_train(self, caption_features, caption_features_proj, captions_mask, e_hidden_states, c_hidden_states, c_cell_states, cap_vecs, batch_size, event_idx):
+        loss, acc, count_mask = 0, 0, 0
+        for caption_idx in range(cap_vecs.size(2) - 1):
+            current_caps = cap_vecs[:batch_size, event_idx, caption_idx]
+
+            logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
+                                                                                     caption_features_proj[:batch_size, event_idx],
+                                                                                     captions_mask,
+                                                                                     e_hidden_states.squeeze(0),
+                                                                                     c_hidden_states[:, :batch_size],
+                                                                                     c_cell_states[:, :batch_size],
+                                                                                     current_caps)
+
+            next_cap_vecs = cap_vecs[:batch_size, event_idx, caption_idx + 1]
+            loss += self.word_criterion(logits, next_cap_vecs)
+
+            mask_next_cap_vecs = (next_cap_vecs != self._null)
+            acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
+            count_mask += torch.sum(mask_next_cap_vecs).item()
+
+        loss /= batch_size
+        acc = acc / count_mask
+        return loss, acc
+
+    def _self_critical_sequence_train(self, caption_features, caption_features_proj, captions_mask, e_hidden_states, c_hidden_states, c_cell_states, cap_vecs, batch_size, event_idx):
+        loss, acc, count_mask = 0, 0, 0
+
     def _train(self, engine, batch):
         self.event_rnn.train()
         self.caption_rnn.train()
@@ -305,41 +332,23 @@ class CaptioningSolver(object):
                                                             c_hidden_states[:, :batch_size])
             c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(caption_features_proj[:batch_size, event_idx])
 
-            loss, acc, count_mask = 0., 0., 0.
-            sample_caption = []
             captions_mask = captions_masks[:batch_size, event_idx, :]
-            for caption_idx in range(cap_vecs.size(2) - 1):
-                current_caps = cap_vecs[:batch_size, event_idx, caption_idx]
+            loss, acc = self._teacher_forcing_train(caption_features,
+                                                    caption_features_proj,
+                                                    captions_mask,
+                                                    e_hidden_states,
+                                                    c_hidden_states,
+                                                    c_cell_states,
+                                                    cap_vecs,
+                                                    batch_size,
+                                                    event_idx)
 
-                logits, feats_alpha, (c_hidden_states, c_cell_states) = self.caption_rnn(caption_features[:batch_size, event_idx],
-                                                                                         caption_features_proj[:batch_size, event_idx],
-                                                                                         captions_mask,
-                                                                                         e_hidden_states.squeeze(0),
-                                                                                         c_hidden_states[:, :batch_size],
-                                                                                         c_cell_states[:, :batch_size],
-                                                                                         current_caps)
-
-                next_cap_vecs = cap_vecs[:batch_size, event_idx, caption_idx + 1]
-                loss += self.word_criterion(logits, next_cap_vecs)
-
-                mask_next_cap_vecs = (next_cap_vecs != self._null)
-                acc += torch.sum((torch.argmax(logits, dim=-1) == next_cap_vecs) * mask_next_cap_vecs).item()
-                count_mask += torch.sum(mask_next_cap_vecs).item()
-
-                sample_caption.append(torch.argmax(logits[0]).item())
-
-            loss /= batch_size
             losses += loss
-            accs += acc / count_mask
-
-            sample_captions.append(sample_caption)
+            accs += acc
 
         losses.backward()
         self.optimizer.step()
         accs = accs / event_features.size(1)
-
-        print(decode_captions(np.array(sample_captions[0]), self.idx_to_word)[0])
-        print(decode_captions(cap_vecs[0][0][1:].cpu().numpy(), self.idx_to_word)[0])
 
         return loss.item(), accs
 
@@ -366,48 +375,49 @@ class CaptioningSolver(object):
         self.event_rnn.eval()
         self.caption_rnn.eval()
 
-        caption_features, event_features, events_mask, captions_masks, batch_sizes, timestamps, video_ids = batch
-        caption_features = caption_features.to(device=self.device)
-        event_features = event_features.to(device=self.device)
-        events_mask = events_mask.to(device=self.device)
-        captions_masks = captions_masks.to(device=self.device)
-        batch_sizes = batch_sizes.to(device=self.device)
+        with torch.no_grad():
+            caption_features, event_features, events_mask, captions_masks, batch_sizes, timestamps, video_ids = batch
+            caption_features = caption_features.to(device=self.device)
+            event_features = event_features.to(device=self.device)
+            events_mask = events_mask.to(device=self.device)
+            captions_masks = captions_masks.to(device=self.device)
+            batch_sizes = batch_sizes.to(device=self.device)
 
-        caption_features = self.caption_rnn.normalize(caption_features)
-        caption_features_proj = self.caption_rnn.project_features(caption_features)
+            caption_features = self.caption_rnn.normalize(caption_features)
+            caption_features_proj = self.caption_rnn.project_features(caption_features)
 
-        event_features = self.event_rnn.normalize(event_features)
-        event_features_proj = self.event_rnn.project_features(event_features)
+            event_features = self.event_rnn.normalize(event_features)
+            event_features_proj = self.event_rnn.project_features(event_features)
 
-        e_hidden_states, e_cell_states = self.event_rnn.get_initial_lstm(event_features_proj)
-        c_hidden_states = self.caption_rnn.zero_hidden_states(batch_size=event_features.size(0))
+            e_hidden_states, e_cell_states = self.event_rnn.get_initial_lstm(event_features_proj)
+            c_hidden_states = self.caption_rnn.zero_hidden_states(batch_size=event_features.size(0))
 
-        predictions = defaultdict(list)
-        for event_idx in range(event_features.size(1)):
-            batch_size = batch_sizes[event_idx]
-            captions_mask = captions_masks[:, event_idx, :]
+            predictions = defaultdict(list)
+            for event_idx in range(event_features.size(1)):
+                batch_size = batch_sizes[event_idx]
+                captions_mask = captions_masks[:, event_idx, :]
 
-            e_hidden_states, e_cell_states = self.event_rnn(event_idx,
-                                                            event_features[:batch_size],
-                                                            event_features_proj[:batch_size],
-                                                            events_mask[:batch_size],
-                                                            e_hidden_states[:, :batch_size],
-                                                            e_cell_states[:, :batch_size],
-                                                            c_hidden_states[:, :batch_size])
-            c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(caption_features_proj[:batch_size, event_idx])
+                e_hidden_states, e_cell_states = self.event_rnn(event_idx,
+                                                                event_features[:batch_size],
+                                                                event_features_proj[:batch_size],
+                                                                events_mask[:batch_size],
+                                                                e_hidden_states[:, :batch_size],
+                                                                e_cell_states[:, :batch_size],
+                                                                c_hidden_states[:, :batch_size])
+                c_hidden_states, c_cell_states = self.caption_rnn.get_initial_lstm(caption_features_proj[:batch_size, event_idx])
 
-            cap_vecs = self.beam_decoder.decode(caption_features[:batch_size, event_idx],
-                                                caption_features_proj[:batch_size, event_idx], 
-                                                captions_mask[:batch_size], 
-                                                e_hidden_states.squeeze(0), 
-                                                c_hidden_states,
-                                                c_cell_states)
+                cap_vecs = self.decoder.beam_search_decode(caption_features[:batch_size, event_idx],
+                                                           caption_features_proj[:batch_size, event_idx],
+                                                           captions_mask[:batch_size],
+                                                           e_hidden_states.squeeze(0),
+                                                           c_hidden_states,
+                                                           c_cell_states)
 
-            sentences = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
-            for video_id, event_timestamps, sentence in zip(video_ids, timestamps, sentences):
-                predictions[video_id].append({'sentence': sentence, 'timestamp': event_timestamps[event_idx]})
+                sentences = decode_captions(cap_vecs.cpu().numpy(), self.idx_to_word)
+                for video_id, event_timestamps, sentence in zip(video_ids, timestamps, sentences):
+                    predictions[video_id].append({'sentence': sentence, 'timestamp': event_timestamps[event_idx]})
 
-        engine.state.annotations['results'].update(predictions)
+            engine.state.annotations['results'].update(predictions)
 
     def train(self):
         self.train_engine.run(self.train_loader, max_epochs=self.n_epochs)
